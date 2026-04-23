@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings } from "lucide-react";
+import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
+import { NotificationsDropdown } from "./notifications-dropdown";
 
 const mobileItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard },
@@ -14,8 +15,31 @@ const mobileItems = [
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
-export function AdminTopbar({ title, subtitle }: { title: string; subtitle?: string }) {
+interface Notification {
+  id: string;
+  type: "order" | "low_stock" | "customer" | "review" | "system";
+  title: string;
+  message: string;
+  link: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+interface AdminTopbarProps {
+  title: string;
+  subtitle?: string;
+  notifications?: Notification[];
+  unreadCount?: number;
+}
+
+export function AdminTopbar({ 
+  title, 
+  subtitle, 
+  notifications = [], 
+  unreadCount = 0 
+}: AdminTopbarProps) {
   const [open, setOpen] = useState(false);
+  
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
       <div className="h-16 px-4 sm:px-6 flex items-center gap-4">
@@ -38,10 +62,11 @@ export function AdminTopbar({ title, subtitle }: { title: string; subtitle?: str
             className="h-10 w-64 rounded-full border border-input bg-background pl-9 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
-        <button className="relative inline-flex size-10 items-center justify-center rounded-full hover:bg-accent" aria-label="Notifications">
-          <Bell className="size-5" />
-          <span className="absolute top-2 right-2 size-2 rounded-full bg-primary" />
-        </button>
+        
+        <NotificationsDropdown 
+          notifications={notifications} 
+          unreadCount={unreadCount} 
+        />
       </div>
 
       {open && (

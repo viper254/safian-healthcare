@@ -1,9 +1,50 @@
+-- =============================================================================
+-- Safian Healthcare & Supplies — Seed Data
+-- Insert the 5 main product categories
+-- =============================================================================
+
 -- Seed categories
 insert into public.categories (slug, name, description, icon, image_url, sort_order) values
-  ('medical-student-kits', 'Medical Student Kits', 'Essential kits for nursing, clinical and medical students — starter packs that cover the fundamentals.', 'GraduationCap', 'https://images.unsplash.com/photo-1579154204601-01588f351e67?auto=format&fit=crop&w=1200&q=80', 1),
-  ('professional-tools', 'Professional Tools', 'Stethoscopes, otoscopes, diagnostic kits and surgical instruments for everyday clinical use.', 'Stethoscope', 'https://images.unsplash.com/photo-1583912267550-d44c9e1a4a42?auto=format&fit=crop&w=1200&q=80', 2),
-  ('facility-items', 'Facility Items', 'Furniture, lighting, sterilisers and devices that equip the modern clinic or hospital ward.', 'Building2', 'https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1200&q=80', 3),
-  ('patient-supplies', 'Patient Supplies', 'Consumables, wound care, mobility aids and disposables for ongoing patient management.', 'HeartPulse', 'https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1200&q=80', 4)
+  (
+    'diagnostic-essentials',
+    'Diagnostic Essentials',
+    'Stethoscopes, blood pressure machines, thermometers, pulse oximeters, glucometers and essential diagnostic tools.',
+    'Stethoscope',
+    'https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1600&q=80',
+    1
+  ),
+  (
+    'procedure-practical-kits',
+    'Procedure & Practical Kits',
+    'IV cannulation kits, suturing kits, catheterization kits, dressing packs, minor surgical kits and emergency procedure kits.',
+    'Syringe',
+    'https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1600&q=80',
+    2
+  ),
+  (
+    'medical-wear-protective-gear',
+    'Medical Wear & Protective Gear',
+    'Lab coats, scrubs, theatre caps, disposable gloves, face masks, aprons and protective gowns for medical professionals.',
+    'Shield',
+    'https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1600&q=80',
+    3
+  ),
+  (
+    'clinical-academic-support-tools',
+    'Clinical & Academic Support Tools',
+    'Clinical pocket guides, OSCE preparation guides, drug reference booklets, logbooks, case presentation templates and revision notes.',
+    'BookOpen',
+    'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1600&q=80',
+    4
+  ),
+  (
+    'home-care-patient-support-devices',
+    'Home Care & Patient Support Devices',
+    'Home BP machines, glucometers, wheelchairs, oxygen saturation monitors, home care kits and elderly care support packs.',
+    'HeartPulse',
+    'https://images.unsplash.com/photo-1583912267550-d44c9c5f6c07?auto=format&fit=crop&w=1600&q=80',
+    5
+  )
 on conflict (slug) do update set
   name = excluded.name,
   description = excluded.description,

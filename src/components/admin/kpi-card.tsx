@@ -1,24 +1,40 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { TrendingDown, TrendingUp, type LucideIcon } from "lucide-react";
+import { 
+  TrendingDown, 
+  TrendingUp, 
+  DollarSign,
+  ShoppingBag,
+  Users,
+  Package,
+  type LucideIcon 
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+
+const iconMap: Record<string, LucideIcon> = {
+  DollarSign,
+  ShoppingBag,
+  Users,
+  Package,
+};
 
 export function KpiCard({
   label,
   value,
   delta,
-  icon: Icon,
+  icon,
   accent = "orange",
   index = 0,
 }: {
   label: string;
   value: string;
   delta?: number;
-  icon: LucideIcon;
+  icon: string;
   accent?: "orange" | "green" | "blue" | "purple";
   index?: number;
 }) {
+  const Icon = iconMap[icon] || Package;
   const isUp = (delta ?? 0) >= 0;
   const accentBg: Record<string, string> = {
     orange: "bg-brand-orange-500",

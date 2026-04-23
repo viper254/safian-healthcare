@@ -17,29 +17,41 @@ const config: Config = {
       colors: {
         // Brand palette pulled from the Safian logo
         brand: {
+          green: {
+            50: "#F0F7EC",
+            100: "#D9ECC9",
+            200: "#B8DD9F",
+            300: "#96CE75",
+            400: "#7BBF55",
+            500: "#6B9F3E", // primary green from logo
+            600: "#5A8533",
+            700: "#486B28",
+            800: "#36501D",
+            900: "#243612",
+          },
           orange: {
             50: "#FFF6EC",
             100: "#FFE7CC",
             200: "#FFCE99",
             300: "#FFB566",
             400: "#FF9D33",
-            500: "#F68B1F", // primary orange
-            600: "#D9730E",
-            700: "#A8580B",
-            800: "#713A06",
-            900: "#3B1E03",
+            500: "#F68B1F", // primary orange from logo
+            600: "#E57A0E",
+            700: "#B85F0B",
+            800: "#8A4708",
+            900: "#5C2F05",
           },
-          green: {
-            50: "#ECFBF0",
-            100: "#CEF4D8",
-            200: "#9FE9B3",
-            300: "#6FDE8D",
-            400: "#40D367",
-            500: "#22B04A", // primary green
-            600: "#198838",
-            700: "#126328",
-            800: "#0C421B",
-            900: "#06220E",
+          blue: {
+            50: "#EBF2F9",
+            100: "#D1E1F0",
+            200: "#A8C7E3",
+            300: "#7FADD6",
+            400: "#5693C9",
+            500: "#2B5C9E", // primary blue from logo
+            600: "#1E4A7F",
+            700: "#183A65",
+            800: "#122A4B",
+            900: "#0C1A31",
           },
         },
         background: "hsl(var(--background))",
@@ -118,6 +130,10 @@ const config: Config = {
           "0%": { transform: "translateX(0)" },
           "100%": { transform: "translateX(-50%)" },
         },
+        "scroll-left": {
+          "0%": { transform: "translateX(0)" },
+          "100%": { transform: "translateX(-50%)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -127,12 +143,13 @@ const config: Config = {
         "pulse-ring": "pulse-ring 2s infinite",
         heartbeat: "heartbeat 1.8s ease-in-out infinite",
         marquee: "marquee 30s linear infinite",
+        "scroll-left": "scroll-left 40s linear infinite",
       },
       backgroundImage: {
         "brand-gradient":
-          "linear-gradient(135deg, #F68B1F 0%, #22B04A 100%)",
+          "linear-gradient(135deg, #6B9F3E 0%, #F68B1F 50%, #2B5C9E 100%)",
         "brand-radial":
-          "radial-gradient(circle at top left, rgba(246,139,31,0.25), transparent 50%), radial-gradient(circle at bottom right, rgba(34,176,74,0.25), transparent 55%)",
+          "radial-gradient(circle at top left, rgba(107,159,62,0.2), transparent 50%), radial-gradient(circle at bottom right, rgba(246,139,31,0.2), transparent 55%)",
       },
     },
   },

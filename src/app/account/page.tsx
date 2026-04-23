@@ -12,7 +12,7 @@ export default async function AccountPage() {
 
   if (supabaseIsConfigured()) {
     try {
-      const supabase = createSupabaseServerClient();
+      const supabase = await createSupabaseServerClient();
       const { data } = await supabase.auth.getUser();
       if (data.user) {
         email = data.user.email ?? null;

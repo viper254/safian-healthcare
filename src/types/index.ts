@@ -1,8 +1,9 @@
 export type CategorySlug =
-  | "medical-student-kits"
-  | "professional-tools"
-  | "facility-items"
-  | "patient-supplies";
+  | "diagnostic-essentials"
+  | "procedure-practical-kits"
+  | "medical-wear-protective-gear"
+  | "clinical-academic-support-tools"
+  | "home-care-patient-support-devices";
 
 export interface Category {
   id: string;

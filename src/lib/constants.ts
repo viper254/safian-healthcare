@@ -1,50 +1,61 @@
 import type { CategorySlug } from "@/types";
 
-export const SITE_NAME = "Safian Healthcare & Supplies";
+export const SITE_NAME = "SAFIAN HEALTHCARE & MEDICAL SUPPLIES";
 export const SITE_TAGLINE = "Trusted medical tools, kits & facility supplies";
 export const SITE_SHORT = "Safian";
 export const COMPANY_CONTACT = {
-  phone: "+254 700 000 000",
-  email: "orders@safian.co.ke",
-  whatsapp: "+254700000000",
-  address: "Biashara Street, Nairobi, Kenya",
+  phone: "0756 597 813",
+  phoneFormatted: "+254 756 597 813",
+  email: "info@safianhealthcare.com",
+  whatsapp: "254756597813", // Format for WhatsApp API (no + or spaces)
+  whatsappDisplay: "0756 597 813",
+  address: "Platinum Plaza, Nairobi CBD",
 };
 
 export const CATEGORY_META: Record<
   CategorySlug,
   { name: string; description: string; icon: string; accent: "orange" | "green"; image: string }
 > = {
-  "medical-student-kits": {
-    name: "Medical Student Kits",
+  "diagnostic-essentials": {
+    name: "Diagnostic Essentials",
     description:
-      "Clinical bundles, dissection sets, anatomy models and study essentials for health students.",
-    icon: "GraduationCap",
-    accent: "orange",
-    image:
-      "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1600&q=80",
-  },
-  "professional-tools": {
-    name: "Professional Tools",
-    description:
-      "Stethoscopes, otoscopes, diagnostic kits, surgical instruments for practicing clinicians.",
+      "Stethoscopes, blood pressure machines, thermometers, pulse oximeters, glucometers and essential diagnostic tools.",
     icon: "Stethoscope",
     accent: "green",
     image:
       "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1600&q=80",
   },
-  "facility-items": {
-    name: "Facility Items",
+  "procedure-practical-kits": {
+    name: "Procedure & Practical Kits",
     description:
-      "Hospital beds, exam couches, trolleys, autoclaves and larger equipment for clinics & hospitals.",
-    icon: "Building2",
+      "IV cannulation kits, suturing kits, catheterization kits, dressing packs, minor surgical kits and emergency procedure kits.",
+    icon: "Syringe",
     accent: "orange",
     image:
-      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1600&q=80",
+      "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1600&q=80",
   },
-  "patient-supplies": {
-    name: "Patient Supplies",
+  "medical-wear-protective-gear": {
+    name: "Medical Wear & Protective Gear",
     description:
-      "Mobility aids, wound care, oxygen, PPE, and consumables for patients and home care.",
+      "Lab coats, scrubs, theatre caps, disposable gloves, face masks, aprons and protective gowns for medical professionals.",
+    icon: "Shield",
+    accent: "green",
+    image:
+      "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1600&q=80",
+  },
+  "clinical-academic-support-tools": {
+    name: "Clinical & Academic Support Tools",
+    description:
+      "Clinical pocket guides, OSCE preparation guides, drug reference booklets, logbooks, case presentation templates and revision notes.",
+    icon: "BookOpen",
+    accent: "orange",
+    image:
+      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1600&q=80",
+  },
+  "home-care-patient-support-devices": {
+    name: "Home Care & Patient Support Devices",
+    description:
+      "Home BP machines, glucometers, wheelchairs, oxygen saturation monitors, home care kits and elderly care support packs.",
     icon: "HeartPulse",
     accent: "green",
     image:
@@ -53,10 +64,11 @@ export const CATEGORY_META: Record<
 };
 
 export const CATEGORY_ORDER: CategorySlug[] = [
-  "medical-student-kits",
-  "professional-tools",
-  "facility-items",
-  "patient-supplies",
+  "diagnostic-essentials",
+  "procedure-practical-kits",
+  "medical-wear-protective-gear",
+  "clinical-academic-support-tools",
+  "home-care-patient-support-devices",
 ];
 
 export const DELIVERY_FEE_KES = 350;

@@ -4,7 +4,7 @@ import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase
 export async function POST(request: Request) {
   if (supabaseIsConfigured()) {
     try {
-      const supabase = createSupabaseServerClient();
+      const supabase = await createSupabaseServerClient();
       await supabase.auth.signOut();
     } catch {
       // ignore

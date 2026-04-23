@@ -1,4 +1,3 @@
-import { DollarSign, ShoppingBag, Users, Package } from "lucide-react";
 import { AdminTopbar } from "@/components/admin/topbar";
 import { KpiCard } from "@/components/admin/kpi-card";
 import {
@@ -7,33 +6,35 @@ import {
   VisitsBarChart,
 } from "@/components/admin/charts";
 import { getAdminDashboard } from "@/lib/admin-data";
+import { getNotifications, getUnreadCount } from "@/lib/notifications";
 import { formatDateTime, formatKES } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
 
 export default async function AdminDashboardPage() {
-  const data = await getAdminDashboard();
+  const [data, notifications, unreadCount] = await Promise.all([
+    getAdminDashboard(),
+    getNotifications(5),
+    getUnreadCount(),
+  ]);
+  
   return (
     <>
       <AdminTopbar
         title="Dashboard"
+        notifications={notifications}
+        unreadCount={unreadCount}
         subtitle="Overview of store performance in the last 30 days"
       />
       <div className="p-4 sm:p-6 space-y-6">
-        {data.demo && (
-          <div className="rounded-xl border border-dashed border-amber-300 bg-amber-50 text-amber-900 px-4 py-3 text-xs">
-            Demo analytics — connect Supabase to see live numbers.
-          </div>
-        )}
-
         {/* KPI row */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <KpiCard
             label="Revenue (30d)"
             value={formatKES(data.kpis.revenue)}
             delta={12}
-            icon={DollarSign}
+            icon="DollarSign"
             accent="orange"
             index={0}
           />
@@ -41,7 +42,7 @@ export default async function AdminDashboardPage() {
             label="Orders"
             value={String(data.kpis.orders)}
             delta={8}
-            icon={ShoppingBag}
+            icon="ShoppingBag"
             accent="green"
             index={1}
           />
@@ -49,7 +50,7 @@ export default async function AdminDashboardPage() {
             label="Customers"
             value={String(data.kpis.customers)}
             delta={5}
-            icon={Users}
+            icon="Users"
             accent="blue"
             index={2}
           />
@@ -57,7 +58,7 @@ export default async function AdminDashboardPage() {
             label="Avg. order value"
             value={formatKES(data.kpis.aov)}
             delta={-2}
-            icon={Package}
+            icon="Package"
             accent="purple"
             index={3}
           />

@@ -46,7 +46,7 @@ const mockProfiles: Profile[] = [
 async function loadProfiles(): Promise<Profile[]> {
   if (!supabaseIsConfigured()) return mockProfiles;
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data } = await supabase
       .from("profiles")
       .select("*")

@@ -5,7 +5,6 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomBar } from "@/components/layout/mobile-bottom-bar";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
-import { DemoBanner } from "@/components/layout/demo-banner";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
 const inter = Inter({
@@ -26,7 +25,7 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description:
-    "Safian Healthcare & Supplies — medical student kits, professional tools, facility items and patient supplies. Fast delivery across Kenya.",
+    "SAFIAN HEALTHCARE & MEDICAL SUPPLIES — medical supplies, healthcare equipment, and home-based care solutions. Fast delivery across Kenya.",
   applicationName: SITE_NAME,
   keywords: [
     "medical supplies",
@@ -40,7 +39,7 @@ export const metadata: Metadata = {
     type: "website",
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description:
-      "Shop medical student kits, professional tools, facility items and patient supplies.",
+      "Shop medical supplies, healthcare equipment, and home-based care solutions.",
     images: ["/logo.jpeg"],
   },
   icons: { icon: "/logo.jpeg", apple: "/logo.jpeg" },
@@ -52,7 +51,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
-        <DemoBanner />
         <Header />
         <main className="min-h-[60vh]">{children}</main>
         <Footer />

@@ -10,6 +10,7 @@ import {
   UserRound,
   X,
   LogIn,
+  User,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,8 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/store/cart-store";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/constants";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { ReviewsTicker } from "./reviews-ticker";
 
 const primaryNav = [
   { href: "/", label: "Home" },
@@ -30,6 +33,8 @@ export function Header() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<any>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
   const count = useCart((s) => s.totalQty());
 
   useEffect(() => {
@@ -38,6 +43,39 @@ export function Header() {
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Check authentication status
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    
+    // Get initial session
+    supabase.auth.getUser().then(({ data }) => {
+      setUser(data.user);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  // Fetch featured reviews
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    
+    supabase
+      .from("reviews")
+      .select("id, customer_name, rating, review_text")
+      .eq("is_approved", true)
+      .eq("is_featured", true)
+      .order("created_at", { ascending: false })
+      .limit(10)
+      .then(({ data }) => {
+        if (data) setReviews(data);
+      });
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -54,6 +92,9 @@ export function Header() {
           : "border-transparent bg-background",
       )}
     >
+      {/* Reviews Ticker */}
+      <ReviewsTicker reviews={reviews} />
+
       {/* Top announcement bar */}
       <div className="bg-brand-gradient text-white text-[12px]">
         <div className="container flex h-8 items-center justify-between gap-3">
@@ -144,10 +185,17 @@ export function Header() {
             variant="gradient"
             className="hidden md:inline-flex"
           >
-            <Link href="/login">
-              <LogIn className="size-4" />
-              Sign in
-            </Link>
+            {user ? (
+              <Link href="/account">
+                <User className="size-4" />
+                Account
+              </Link>
+            ) : (
+              <Link href="/login">
+                <LogIn className="size-4" />
+                Sign in
+              </Link>
+            )}
           </Button>
         </div>
       </div>
@@ -218,15 +266,33 @@ export function Header() {
               ))}
             </nav>
             <div className="mt-auto grid gap-2">
-              <Button asChild variant="gradient">
-                <Link href="/login">
-                  <LogIn className="size-4" />
-                  Sign in
-                </Link>
-              </Button>
-              <Button asChild variant="outline">
-                <Link href="/register">Create account</Link>
-              </Button>
+              {user ? (
+                <>
+                  <Button asChild variant="gradient">
+                    <Link href="/account">
+                      <User className="size-4" />
+                      My Account
+                    </Link>
+                  </Button>
+                  <form action="/api/auth/signout" method="post">
+                    <Button type="submit" variant="outline" className="w-full">
+                      Sign out
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant="gradient">
+                    <Link href="/login">
+                      <LogIn className="size-4" />
+                      Sign in
+                    </Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/register">Create account</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </div>

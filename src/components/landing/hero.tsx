@@ -6,13 +6,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   ArrowRight,
-  GraduationCap,
   Stethoscope,
   HeartPulse,
-  Building2,
   ShieldCheck,
   Truck,
   CreditCard,
+  Syringe,
+  Shield,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -28,40 +29,50 @@ type Slide = {
 
 const slides: Slide[] = [
   {
-    eyebrow: "Medical Student Kits",
-    titleTop: "Kits that help you",
-    titleAccent: "Pass every rotation",
-    desc: "Stethoscopes, BP cuffs, dissection sets and study bundles curated for medical students across Kenya.",
+    eyebrow: "Diagnostic Essentials",
+    titleTop: "Essential tools for",
+    titleAccent: "accurate diagnosis",
+    desc: "Stethoscopes, blood pressure machines, thermometers, pulse oximeters, glucometers and vital diagnostic equipment.",
+    image:
+      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1600&q=80",
+    tintFrom: "from-brand-green-500/30",
+    tintTo: "to-brand-orange-500/20",
+  },
+  {
+    eyebrow: "Procedure & Practical Kits",
+    titleTop: "Hands-on training",
+    titleAccent: "kits for students",
+    desc: "IV cannulation kits, suturing kits, catheterization kits, dressing packs and emergency procedure training tools.",
     image:
       "https://images.unsplash.com/photo-1584982751601-97dcc096659c?auto=format&fit=crop&w=1600&q=80",
+    tintFrom: "from-brand-orange-500/25",
+    tintTo: "to-brand-green-500/20",
+  },
+  {
+    eyebrow: "Medical Wear & Protective Gear",
+    titleTop: "Professional attire",
+    titleAccent: "for healthcare workers",
+    desc: "Lab coats, scrubs, theatre caps, disposable gloves, face masks, aprons and complete protective gear solutions.",
+    image:
+      "https://images.unsplash.com/photo-1582750433449-648ed127bb54?auto=format&fit=crop&w=1600&q=80",
+    tintFrom: "from-brand-green-500/30",
+    tintTo: "to-brand-orange-500/25",
+  },
+  {
+    eyebrow: "Clinical & Academic Support",
+    titleTop: "Academic excellence",
+    titleAccent: "support tools",
+    desc: "Clinical pocket guides, OSCE preparation guides, drug reference booklets, logbooks and revision materials.",
+    image:
+      "https://images.unsplash.com/photo-1481627834876-b7833e8f5570?auto=format&fit=crop&w=1600&q=80",
     tintFrom: "from-brand-orange-500/30",
     tintTo: "to-brand-green-500/20",
   },
   {
-    eyebrow: "Professional Tools",
-    titleTop: "Diagnostic tools",
-    titleAccent: "Clinicians trust",
-    desc: "Acoustic stethoscopes, otoscopes, sphygmomanometers and precision surgical instruments.",
-    image:
-      "https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=1600&q=80",
-    tintFrom: "from-brand-green-500/25",
-    tintTo: "to-brand-orange-500/20",
-  },
-  {
-    eyebrow: "Facility Items",
-    titleTop: "Equip your",
-    titleAccent: "Clinic or hospital",
-    desc: "Hospital beds, exam couches, autoclaves, trolleys and full facility fit-outs — delivered & installed.",
-    image:
-      "https://images.unsplash.com/photo-1586773860418-d37222d8fce3?auto=format&fit=crop&w=1600&q=80",
-    tintFrom: "from-brand-orange-500/30",
-    tintTo: "to-brand-green-500/25",
-  },
-  {
-    eyebrow: "Patient Supplies",
-    titleTop: "Everyday care,",
-    titleAccent: "Delivered home",
-    desc: "Mobility aids, oxygen, wound care, PPE, and consumables — shipped countrywide.",
+    eyebrow: "Home Care & Patient Support",
+    titleTop: "Quality care",
+    titleAccent: "at home",
+    desc: "Home BP machines, glucometers, wheelchairs, oxygen monitors, home care kits and elderly support solutions.",
     image:
       "https://images.unsplash.com/photo-1583912267550-d44c9c5f6c07?auto=format&fit=crop&w=1600&q=80",
     tintFrom: "from-brand-green-500/30",
@@ -70,10 +81,11 @@ const slides: Slide[] = [
 ];
 
 const categoryChips = [
-  { icon: GraduationCap, label: "Student Kits", href: "/shop/medical-student-kits" },
-  { icon: Stethoscope, label: "Professional Tools", href: "/shop/professional-tools" },
-  { icon: Building2, label: "Facility Items", href: "/shop/facility-items" },
-  { icon: HeartPulse, label: "Patient Supplies", href: "/shop/patient-supplies" },
+  { icon: Stethoscope, label: "Diagnostic Essentials", href: "/shop/diagnostic-essentials" },
+  { icon: Syringe, label: "Procedure Kits", href: "/shop/procedure-practical-kits" },
+  { icon: Shield, label: "Protective Gear", href: "/shop/medical-wear-protective-gear" },
+  { icon: BookOpen, label: "Academic Tools", href: "/shop/clinical-academic-support-tools" },
+  { icon: HeartPulse, label: "Home Care", href: "/shop/home-care-patient-support-devices" },
 ];
 
 const trustBadges = [

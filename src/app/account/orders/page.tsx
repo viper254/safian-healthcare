@@ -23,7 +23,7 @@ const statusMeta: Record<
 async function loadOrders(): Promise<{ orders: Order[]; signedIn: boolean }> {
   if (!supabaseIsConfigured()) return { orders: [], signedIn: false };
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: auth } = await supabase.auth.getUser();
     if (!auth.user) return { orders: [], signedIn: false };
     const { data } = await supabase

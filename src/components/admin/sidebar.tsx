@@ -11,6 +11,7 @@ import {
   Settings,
   LogOut,
   ArrowUpRight,
+  Star,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
@@ -20,6 +21,7 @@ const items = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tag },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

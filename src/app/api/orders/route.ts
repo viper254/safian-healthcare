@@ -39,7 +39,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const supabase = createSupabaseServerClient();
+    const supabase = await createSupabaseServerClient();
     const { data: authUser } = await supabase.auth.getUser();
     const { data: order, error: orderErr } = await supabase
       .from("orders")

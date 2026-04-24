@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import Image from "next/image";
 
 interface Category {
   id: string;
@@ -14,30 +15,58 @@ interface Category {
   name: string;
 }
 
-export function ProductForm({ productId }: { productId?: string }) {
+interface ProductImage {
+  id: string;
+  url: string;
+  alt: string | null;
+  sort_order: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  short_description: string | null;
+  brand: string | null;
+  sku: string | null;
+  category_id: string | null;
+  original_price: number;
+  discounted_price: number | null;
+  offer_price: number | null;
+  stock_quantity: number;
+  low_stock_threshold: number;
+  is_featured: boolean;
+  is_active: boolean;
+  category?: { id: string; name: string; slug: string } | null;
+  images?: ProductImage[];
+}
+
+export function ProductEditForm({ product }: { product: Product }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previews, setPreviews] = useState<string[]>([]);
+  const [existingImages, setExistingImages] = useState<ProductImage[]>(product.images || []);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: "",
-    slug: "",
-    description: "",
-    short_description: "",
-    brand: "",
-    sku: "",
-    category_id: "",
-    original_price: "",
-    discounted_price: "",
-    offer_price: "",
-    stock_quantity: "",
-    low_stock_threshold: "5",
-    is_featured: false,
-    is_active: true,
+    name: product.name,
+    slug: product.slug,
+    description: product.description,
+    short_description: product.short_description || "",
+    brand: product.brand || "",
+    sku: product.sku || "",
+    category_id: product.category_id || "",
+    original_price: product.original_price.toString(),
+    discounted_price: product.discounted_price?.toString() || "",
+    offer_price: product.offer_price?.toString() || "",
+    stock_quantity: product.stock_quantity.toString(),
+    low_stock_threshold: product.low_stock_threshold.toString(),
+    is_featured: product.is_featured,
+    is_active: product.is_active,
   });
 
   // Fetch categories on mount
@@ -53,17 +82,6 @@ export function ProductForm({ productId }: { productId?: string }) {
     }
     fetchCategories();
   }, []);
-
-  // Auto-generate slug from name
-  useEffect(() => {
-    if (formData.name && !productId) {
-      const slug = formData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/^-|-$/g, "");
-      setFormData(prev => ({ ...prev, slug }));
-    }
-  }, [formData.name, productId]);
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value, type } = e.target;
@@ -85,9 +103,26 @@ export function ProductForm({ productId }: { productId?: string }) {
     URL.revokeObjectURL(previews[index]);
     setPreviews(prev => prev.filter((_, i) => i !== index));
     
-    // Reset file input
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+  }
+
+  async function removeExistingImage(imageId: string) {
+    if (!confirm("Delete this image?")) return;
+    
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const { error } = await supabase
+        .from("product_images")
+        .delete()
+        .eq("id", imageId);
+      
+      if (error) throw error;
+      
+      setExistingImages(prev => prev.filter(img => img.id !== imageId));
+    } catch (err) {
+      console.error("Error deleting image:", err);
     }
   }
 
@@ -102,7 +137,7 @@ export function ProductForm({ productId }: { productId?: string }) {
         name: formData.name.trim(),
         slug: formData.slug.trim(),
         description: formData.description.trim(),
-        short_description: formData.short_description.trim(),
+        short_description: formData.short_description.trim() || null,
         brand: formData.brand.trim() || null,
         sku: formData.sku.trim() || null,
         category_id: formData.category_id || null,
@@ -115,9 +150,9 @@ export function ProductForm({ productId }: { productId?: string }) {
         is_active: formData.is_active,
       };
 
-      // Create product via API
-      const response = await fetch("/api/admin/products", {
-        method: "POST",
+      // Update product via API
+      const response = await fetch(`/api/admin/products/${product.id}`, {
+        method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
       });
@@ -125,12 +160,10 @@ export function ProductForm({ productId }: { productId?: string }) {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to create product");
+        throw new Error(result.error || "Failed to update product");
       }
 
-      const product = result;
-
-      // Handle image uploads if any
+      // Handle new image uploads if any
       if (fileInputRef.current?.files && fileInputRef.current.files.length > 0) {
         const supabase = createSupabaseBrowserClient();
         const files = Array.from(fileInputRef.current.files);
@@ -140,28 +173,24 @@ export function ProductForm({ productId }: { productId?: string }) {
           const fileExt = file.name.split(".").pop();
           const fileName = `${product.id}/${Date.now()}-${i}.${fileExt}`;
 
-          // Upload to Supabase Storage
           const { error: uploadError } = await supabase.storage
             .from("product-images")
             .upload(fileName, file);
 
           if (uploadError) {
             console.error("Upload error:", uploadError);
-            setError(`Image upload failed: ${uploadError.message}. Please ensure the 'product-images' storage bucket exists in Supabase.`);
             continue;
           }
 
-          // Get public URL
           const { data: { publicUrl } } = supabase.storage
             .from("product-images")
             .getPublicUrl(fileName);
 
-          // Insert product_images record
           await supabase.from("product_images").insert({
             product_id: product.id,
             url: publicUrl,
             alt: formData.name,
-            sort_order: i,
+            sort_order: existingImages.length + i,
           });
         }
       }
@@ -170,7 +199,7 @@ export function ProductForm({ productId }: { productId?: string }) {
       router.refresh();
     } catch (err: any) {
       console.error("Error:", err);
-      setError(err?.message || "Failed to create product");
+      setError(err?.message || "Failed to update product");
     } finally {
       setLoading(false);
     }
@@ -194,7 +223,6 @@ export function ProductForm({ productId }: { productId?: string }) {
             required
             value={formData.name}
             onChange={handleChange}
-            placeholder="e.g., Littmann Classic III Stethoscope"
           />
         </div>
 
@@ -207,11 +235,7 @@ export function ProductForm({ productId }: { productId?: string }) {
             required
             value={formData.slug}
             onChange={handleChange}
-            placeholder="e.g., littmann-classic-iii-stethoscope"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Auto-generated from name (lowercase, hyphens, no spaces)
-          </p>
         </div>
 
         {/* Category */}
@@ -242,7 +266,6 @@ export function ProductForm({ productId }: { productId?: string }) {
             name="short_description"
             value={formData.short_description}
             onChange={handleChange}
-            placeholder="Brief one-line description"
           />
         </div>
 
@@ -256,7 +279,6 @@ export function ProductForm({ productId }: { productId?: string }) {
             value={formData.description}
             onChange={handleChange}
             rows={4}
-            placeholder="Detailed product description..."
           />
         </div>
 
@@ -269,7 +291,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               name="brand"
               value={formData.brand}
               onChange={handleChange}
-              placeholder="e.g., 3M Littmann"
             />
           </div>
 
@@ -280,7 +301,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               name="sku"
               value={formData.sku}
               onChange={handleChange}
-              placeholder="e.g., LITT-C3-BLK"
             />
           </div>
         </div>
@@ -297,7 +317,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               required
               value={formData.original_price}
               onChange={handleChange}
-              placeholder="8500"
             />
           </div>
 
@@ -310,7 +329,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               step="0.01"
               value={formData.discounted_price}
               onChange={handleChange}
-              placeholder="Leave blank if no discount"
             />
           </div>
         </div>
@@ -326,7 +344,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               step="0.01"
               value={formData.offer_price}
               onChange={handleChange}
-              placeholder="Special offer price"
             />
           </div>
         </div>
@@ -342,7 +359,6 @@ export function ProductForm({ productId }: { productId?: string }) {
               required
               value={formData.stock_quantity}
               onChange={handleChange}
-              placeholder="25"
             />
           </div>
 
@@ -354,14 +370,34 @@ export function ProductForm({ productId }: { productId?: string }) {
               type="number"
               value={formData.low_stock_threshold}
               onChange={handleChange}
-              placeholder="5"
             />
           </div>
         </div>
 
-        {/* Images */}
+        {/* Existing Images */}
+        {existingImages.length > 0 && (
+          <div>
+            <Label>Current Images</Label>
+            <div className="grid grid-cols-4 gap-2 mt-2">
+              {existingImages.map((img) => (
+                <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border">
+                  <Image src={img.url} alt={img.alt || ""} fill className="object-cover" />
+                  <button
+                    type="button"
+                    onClick={() => removeExistingImage(img.id)}
+                    className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* New Images */}
         <div>
-          <Label htmlFor="images">Product Images</Label>
+          <Label htmlFor="images">Add New Images</Label>
           <Input
             id="images"
             ref={fileInputRef}
@@ -371,11 +407,7 @@ export function ProductForm({ productId }: { productId?: string }) {
             onChange={handleFileChange}
             className="cursor-pointer"
           />
-          <p className="text-xs text-muted-foreground mt-1">
-            Upload product images (multiple allowed)
-          </p>
 
-          {/* Image Previews */}
           {previews.length > 0 && (
             <div className="grid grid-cols-4 gap-2 mt-3">
               {previews.map((url, i) => (
@@ -428,7 +460,7 @@ export function ProductForm({ productId }: { productId?: string }) {
 
       <div className="flex gap-3">
         <Button type="submit" disabled={loading}>
-          {loading ? "Creating..." : "Create Product"}
+          {loading ? "Saving..." : "Save Changes"}
         </Button>
         <Button
           type="button"

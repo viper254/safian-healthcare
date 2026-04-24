@@ -11,12 +11,16 @@ const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
   display: "swap",
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 });
 const poppins = Poppins({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800", "900"],
+  weight: ["600", "700"],
   variable: "--font-poppins",
   display: "swap",
+  preload: true,
+  fallback: ['system-ui', 'arial'],
 });
 
 export const metadata: Metadata = {
@@ -25,24 +29,73 @@ export const metadata: Metadata = {
     template: `%s · ${SITE_NAME}`,
   },
   description:
-    "SAFIAN HEALTHCARE & MEDICAL SUPPLIES — medical supplies, healthcare equipment, and home-based care solutions. Fast delivery across Kenya.",
+    "Trusted supplier of medical student kits, professional diagnostic tools, facility equipment and patient supplies across Kenya. Deliveries within 24 hours to 4 working days. Authentic products, competitive prices.",
   applicationName: SITE_NAME,
   keywords: [
-    "medical supplies",
-    "stethoscope Kenya",
+    "medical supplies Kenya",
+    "stethoscope Nairobi",
     "hospital equipment",
     "medical student kit",
-    "PPE",
+    "PPE Kenya",
+    "diagnostic tools",
+    "blood pressure monitor",
+    "medical scrubs",
     "Safian Healthcare",
+    "healthcare supplies Nairobi",
+    "medical equipment Kenya",
   ],
+  authors: [{ name: "Safian Healthcare & Medical Supplies" }],
+  creator: "Safian Healthcare",
+  publisher: "Safian Healthcare",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"),
+  alternates: {
+    canonical: "/",
+  },
   openGraph: {
     type: "website",
+    locale: "en_KE",
+    url: "/",
+    siteName: SITE_NAME,
     title: `${SITE_NAME} — ${SITE_TAGLINE}`,
     description:
-      "Shop medical supplies, healthcare equipment, and home-based care solutions.",
+      "Trusted supplier of medical student kits, professional diagnostic tools, facility equipment and patient supplies across Kenya.",
+    images: [
+      {
+        url: "/logo.jpeg",
+        width: 1200,
+        height: 630,
+        alt: "Safian Healthcare & Medical Supplies",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${SITE_NAME} — ${SITE_TAGLINE}`,
+    description:
+      "Trusted supplier of medical supplies across Kenya. Deliveries within 24 hours to 4 working days. Authentic products.",
     images: ["/logo.jpeg"],
   },
-  icons: { icon: "/logo.jpeg", apple: "/logo.jpeg" },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: { 
+    icon: "/logo.jpeg", 
+    apple: "/logo.jpeg",
+    shortcut: "/logo.jpeg",
+  },
+  verification: {
+    // Add your verification codes when ready
+    // google: "your-google-verification-code",
+    // yandex: "your-yandex-verification-code",
+  },
 };
 
 export default function RootLayout({

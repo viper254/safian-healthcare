@@ -19,7 +19,7 @@ const items = [
   {
     icon: Truck,
     title: "Countrywide delivery",
-    desc: "Same-day Nairobi and next-day upcountry via trusted logistics partners.",
+    desc: "We process deliveries within 24 hours to 4 working days via trusted logistics partners.",
   },
   {
     icon: ShieldCheck,

@@ -10,11 +10,19 @@ export async function getAdminDashboard() {
   try {
     const supabase = await createSupabaseServerClient();
 
-    // Get orders from last 30 days
+    // Get orders from last 30 days for revenue (only paid)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const { data: orders, error: ordersError } = await supabase
+    const { data: paidOrders, error: paidOrdersError } = await supabase
+      .from("orders")
+      .select("*")
+      .gte("created_at", thirtyDaysAgo.toISOString())
+      .neq("status", "cancelled")
+      .eq("payment_status", "paid");
+
+    // Get all orders (including unpaid) for order count
+    const { data: allOrders, error: allOrdersError } = await supabase
       .from("orders")
       .select("*")
       .gte("created_at", thirtyDaysAgo.toISOString())
@@ -25,10 +33,10 @@ export async function getAdminDashboard() {
       .select("*", { count: "only", head: true })
       .eq("role", "customer");
 
-    if (ordersError) throw ordersError;
+    if (paidOrdersError || allOrdersError) throw paidOrdersError || allOrdersError;
 
     // If no orders, return empty state
-    if (!orders || orders.length === 0) {
+    if (!allOrders || allOrders.length === 0) {
       return {
         kpis: {
           revenue: 0,
@@ -38,6 +46,7 @@ export async function getAdminDashboard() {
         },
         days: Array.from({ length: 30 }).map((_, i) => ({
           date: new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0],
+          label: new Date(Date.now() - (29 - i) * 86400000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
           revenue: 0,
           orders: 0,
           visits: 0,
@@ -50,13 +59,13 @@ export async function getAdminDashboard() {
     }
 
     // Calculate KPIs
-    const revenue = orders.reduce((sum, o) => sum + Number(o.total), 0);
-    const ordersCount = orders.length;
+    const revenue = (paidOrders || []).reduce((sum, o) => sum + Number(o.total), 0);
+    const ordersCount = allOrders.length;
     const aov = ordersCount > 0 ? revenue / ordersCount : 0;
 
-    // Group by day
+    // Group by day (use all orders for chart)
     const dayMap = new Map<string, { revenue: number; orders: number }>();
-    orders.forEach((o) => {
+    (paidOrders || []).forEach((o) => {
       const day = o.created_at.split("T")[0];
       const existing = dayMap.get(day) ?? { revenue: 0, orders: 0 };
       dayMap.set(day, {
@@ -70,13 +79,42 @@ export async function getAdminDashboard() {
       const stats = dayMap.get(date) ?? { revenue: 0, orders: 0 };
       return {
         date,
+        label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         revenue: stats.revenue,
         orders: stats.orders,
         visits: Math.floor(Math.random() * 100) + 50, // TODO: Implement real analytics
       };
     });
 
-    // Get top products (simplified - would need order_items join for real data)
+    // Get category breakdown from paid orders
+    const { data: orderItems } = await supabase
+      .from("order_items")
+      .select(`
+        line_total,
+        product_id,
+        products!inner(category_id, categories!inner(name))
+      `)
+      .in(
+        "order_id",
+        (paidOrders || []).map((o) => o.id)
+      );
+
+    const categoryMap = new Map<string, number>();
+    let totalRevenue = 0;
+
+    (orderItems || []).forEach((item: any) => {
+      const categoryName = item.products?.categories?.name || "Uncategorized";
+      const amount = Number(item.line_total);
+      categoryMap.set(categoryName, (categoryMap.get(categoryName) || 0) + amount);
+      totalRevenue += amount;
+    });
+
+    const categoryBreakdown = Array.from(categoryMap.entries())
+      .map(([name, value]) => ({
+        name,
+        value: totalRevenue > 0 ? Math.round((value / totalRevenue) * 100) : 0,
+      }))
+      .sort((a, b) => b.value - a.value);
     const { data: products } = await supabase
       .from("products")
       .select("id, name, rating_count")
@@ -107,7 +145,7 @@ export async function getAdminDashboard() {
         aov,
       },
       days,
-      categoryBreakdown: [], // TODO: Implement category breakdown
+      categoryBreakdown,
       topProducts,
       recentOrders: (recentOrdersData || []) as Order[],
     };

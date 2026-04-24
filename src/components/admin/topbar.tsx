@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings } from "lucide-react";
+import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings, Star } from "lucide-react";
 import { useState } from "react";
 import { Logo } from "@/components/brand/logo";
 import { NotificationsDropdown } from "./notifications-dropdown";
@@ -11,6 +11,7 @@ const mobileItems = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: Tag },
   { href: "/admin/orders", label: "Orders", icon: ShoppingBag },
+  { href: "/admin/reviews", label: "Reviews", icon: Star },
   { href: "/admin/customers", label: "Customers", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

@@ -16,7 +16,7 @@ export function CallToAction() {
           <p className="mt-3 text-white/90">
             We provide bulk quotations, LPO-friendly invoicing, facility fit-outs
             and on-site training for new equipment. Get a tailored proposal within
-            24 hours.
+            24-48 hours.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button

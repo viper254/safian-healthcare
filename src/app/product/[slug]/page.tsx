@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { getProductBySlug, getProducts } from "@/lib/data";
 import { ProductCard } from "@/components/shop/product-card";
+import { ProductGallery } from "@/components/product/product-gallery";
 import { Breadcrumbs } from "@/app/shop/page";
 import { effectivePrice, formatKES } from "@/lib/utils";
 import { AddToCartBar } from "@/components/shop/add-to-cart-bar";
@@ -21,9 +22,10 @@ import { Badge } from "@/components/ui/badge";
 export const revalidate = 60;
 
 export async function generateMetadata(
-  { params }: { params: { slug: string } },
+  context: { params: Promise<{ slug: string }> },
 ): Promise<Metadata> {
-  const p = await getProductBySlug(params.slug);
+  const { slug } = await context.params;
+  const p = await getProductBySlug(slug);
   if (!p) return { title: "Product not found" };
   return {
     title: p.name,
@@ -32,12 +34,11 @@ export async function generateMetadata(
   };
 }
 
-export default async function ProductPage({
-  params,
-}: {
-  params: { slug: string };
+export default async function ProductPage(context: {
+  params: Promise<{ slug: string }>;
 }) {
-  const product = await getProductBySlug(params.slug);
+  const { slug } = await context.params;
+  const product = await getProductBySlug(slug);
   if (!product) return notFound();
   const { price, type } = effectivePrice(product);
   const savings =
@@ -185,50 +186,6 @@ export default async function ProductPage({
             ))}
           </div>
         </section>
-      )}
-    </div>
-  );
-}
-
-function ProductGallery({
-  images,
-  name,
-}: {
-  images: { url: string; alt?: string | null }[];
-  name: string;
-}) {
-  const primary = images[0];
-  return (
-    <div>
-      <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted ring-1 ring-black/5">
-        {primary ? (
-          <Image
-            src={primary.url}
-            alt={primary.alt ?? name}
-            fill
-            sizes="(max-width: 1024px) 100vw, 50vw"
-            priority
-            className="object-cover"
-          />
-        ) : null}
-      </div>
-      {images.length > 1 && (
-        <div className="mt-3 grid grid-cols-5 gap-2">
-          {images.map((img, i) => (
-            <div
-              key={i}
-              className="relative aspect-square rounded-lg overflow-hidden border bg-muted"
-            >
-              <Image
-                src={img.url}
-                alt={img.alt ?? `${name} ${i + 1}`}
-                fill
-                sizes="100px"
-                className="object-cover"
-              />
-            </div>
-          ))}
-        </div>
       )}
     </div>
   );

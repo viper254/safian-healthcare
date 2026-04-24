@@ -1,0 +1,13 @@
+# Safian Healthcare & Medical Supplies - Robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /admin-login
+Disallow: /account
+Disallow: /account/*
+Disallow: /api/*
+
+# Sitemap
+Sitemap: https://safianhealthcare.com/sitemap.xml

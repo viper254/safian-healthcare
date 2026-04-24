@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Phone, Mail } from "lucide-react";
 import { AdminTopbar } from "@/components/admin/topbar";
 import { Button } from "@/components/ui/button";
 import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
@@ -54,13 +54,13 @@ export default async function AdminOrdersPage() {
                     <td className="p-3">
                       <p className="font-medium">{o.customer_name}</p>
                       {o.customer_phone && (
-                        <p className="text-xs text-muted-foreground">
-                          📱 {o.customer_phone}
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <Phone className="size-3" /> {o.customer_phone}
                         </p>
                       )}
                       {o.customer_email && (
-                        <p className="text-xs text-muted-foreground">
-                          ✉️ {o.customer_email}
+                        <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                          <Mail className="size-3" /> {o.customer_email}
                         </p>
                       )}
                     </td>

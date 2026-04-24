@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -55,6 +56,28 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
+
+  // Auto-fill user details if logged in
+  useEffect(() => {
+    async function loadUserProfile() {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, phone")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) {
+          if (profile.full_name) setName(profile.full_name);
+          if (profile.phone) setPhone(profile.phone);
+        }
+      }
+    }
+    loadUserProfile();
+  }, []);
   
   const delivery = calculateDeliveryFee(city, sub);
   const total = sub + delivery;
@@ -114,10 +137,25 @@ export default function CheckoutPage() {
       
       // Prepare WhatsApp message with order reference
       const itemsList = lines
-        .map((l) => `- ${l.name} — ${formatKES(l.unit_price)} x ${l.quantity}`)
-        .join("\n");
+        .map((l) => `• ${l.name}\n  (${formatKES(l.unit_price)} x ${l.quantity})`)
+        .join("\n\n");
       
-      const message = `Hi Safian Healthcare, I'd like to order:\n\nRef: ${orderReference}\nName: ${name}\nPhone: ${phone}\nCity: ${city}\n\n${itemsList}\n\nSubtotal: ${formatKES(sub)}\nDelivery: ${delivery === 0 ? "Free" : formatKES(delivery)}\nTotal: ${formatKES(total)}\n\nPlease confirm availability and delivery. Thanks!`;
+      const message = `*NEW ORDER: ${orderReference}*
+
+*Customer Details:*
+👤 Name: ${name}
+📞 Phone: ${phone}
+📍 City: ${city}
+
+*Order Items:*
+${itemsList}
+
+*Summary:*
+💰 Subtotal: ${formatKES(sub)}
+🚚 Delivery: ${delivery === 0 ? "FREE" : formatKES(delivery)}
+✅ *Total: ${formatKES(total)}*
+
+Please confirm availability and delivery. Thank you!`;
       
       const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
       

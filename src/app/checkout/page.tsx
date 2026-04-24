@@ -141,7 +141,11 @@ export default function CheckoutPage() {
         .join("\n\n");
       
       // Get the first product image for preview if available
-      const firstItemImage = lines[0]?.image ? `\n\nProduct Image: ${lines[0].image}` : "";
+      // We use a clean redirect URL to mask the technical Supabase storage link
+      const siteUrl = window.location.origin;
+      const firstItemImage = lines[0]?.image 
+        ? `\n\nProduct Image: ${siteUrl}/api/media?url=${encodeURIComponent(lines[0].image)}` 
+        : "";
       
       const message = `*NEW ORDER: ${orderReference}*
 

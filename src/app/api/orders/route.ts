@@ -3,13 +3,15 @@ import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase
 import type { CartLine, PaymentMethod } from "@/types";
 
 type Body = {
-  name: string;
-  email: string;
-  phone: string;
-  address: string;
-  city: string;
+  name?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  city?: string;
   notes?: string;
   payment_method: PaymentMethod;
+  payment_status?: string;
+  status?: string;
   lines: CartLine[];
   subtotal: number;
   delivery_fee: number;
@@ -30,7 +32,6 @@ export async function POST(request: Request) {
   const reference = generateReference();
 
   if (!supabaseIsConfigured()) {
-    // Demo mode — just echo back a fake reference so the flow works end-to-end.
     return NextResponse.json({
       reference,
       demo: true,
@@ -41,27 +42,37 @@ export async function POST(request: Request) {
   try {
     const supabase = await createSupabaseServerClient();
     const { data: authUser } = await supabase.auth.getUser();
+    
+    // For WhatsApp orders, use placeholder data if not provided
     const { data: order, error: orderErr } = await supabase
       .from("orders")
       .insert({
         reference,
         user_id: authUser.user?.id ?? null,
-        customer_name: body.name,
-        customer_email: body.email,
-        customer_phone: body.phone,
-        shipping_address: body.address,
-        shipping_city: body.city,
+        customer_name: body.name || "WhatsApp Customer",
+        customer_email: body.email || "",
+        customer_phone: body.phone || "",
+        shipping_address: body.address || "To be confirmed via WhatsApp",
+        shipping_city: body.city || "Nairobi",
         shipping_notes: body.notes ?? null,
         subtotal: body.subtotal,
         delivery_fee: body.delivery_fee,
         total: body.total,
-        status: "pending",
-        payment_status: "unpaid",
+        status: body.status || "pending",
+        payment_status: body.payment_status || "unpaid",
         payment_method: body.payment_method,
       })
       .select()
       .single();
-    if (orderErr || !order) throw orderErr;
+      
+    if (orderErr) {
+      console.error("Order creation error:", orderErr);
+      throw orderErr;
+    }
+    
+    if (!order) {
+      throw new Error("Order not created");
+    }
 
     const items = body.lines.map((l) => ({
       order_id: order.id,
@@ -72,19 +83,29 @@ export async function POST(request: Request) {
       quantity: l.quantity,
       line_total: l.unit_price * l.quantity,
     }));
+    
     const { error: itemsErr } = await supabase.from("order_items").insert(items);
-    if (itemsErr) throw itemsErr;
+    if (itemsErr) {
+      console.error("Order items error:", itemsErr);
+      throw itemsErr;
+    }
 
-    await supabase.from("analytics_events").insert({
+    // Log analytics event
+    const { error: analyticsErr } = await supabase.from("analytics_events").insert({
       event_type: "order_placed",
       user_id: authUser.user?.id ?? null,
       metadata: { reference, total: body.total, items: body.lines.length },
     });
+    if (analyticsErr) {
+      console.error("Analytics error:", analyticsErr);
+    }
 
     return NextResponse.json({ reference, id: order.id });
-  } catch (err) {
-    console.error("Order creation failed", err);
-    // Still return a reference so demo/preview doesn't break.
-    return NextResponse.json({ reference, error: "Order saved locally only" }, { status: 202 });
+  } catch (err: any) {
+    console.error("Order creation failed:", err);
+    return NextResponse.json(
+      { error: err.message || "Failed to create order" }, 
+      { status: 500 }
+    );
   }
 }

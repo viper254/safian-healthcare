@@ -18,6 +18,8 @@ export default async function AdminDashboardPage() {
     getNotifications(5),
     getUnreadCount(),
   ]);
+
+  const hasData = data.recentOrders.length > 0;
   
   return (
     <>
@@ -64,33 +66,45 @@ export default async function AdminDashboardPage() {
           />
         </div>
 
-        {/* Charts grid */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          <section className="rounded-2xl border bg-card shadow-sm p-5 lg:col-span-2">
-            <header className="flex items-center justify-between mb-2">
-              <div>
-                <h2 className="font-semibold">Revenue & orders</h2>
-                <p className="text-xs text-muted-foreground">Last 30 days</p>
-              </div>
-            </header>
-            <RevenueAreaChart data={data.days} />
-          </section>
-          <section className="rounded-2xl border bg-card shadow-sm p-5">
-            <header className="mb-2">
-              <h2 className="font-semibold">Sales by category</h2>
-              <p className="text-xs text-muted-foreground">Share of 30-day revenue</p>
-            </header>
-            <CategoryPieChart data={data.categoryBreakdown} />
-          </section>
-        </div>
+        {!hasData && (
+          <div className="rounded-2xl border bg-card shadow-sm p-8 text-center">
+            <p className="text-muted-foreground">
+              No orders yet. Charts will appear once you have order data.
+            </p>
+          </div>
+        )}
 
-        <section className="rounded-2xl border bg-card shadow-sm p-5">
-          <header className="mb-2">
-            <h2 className="font-semibold">Site traffic</h2>
-            <p className="text-xs text-muted-foreground">Page views per day</p>
-          </header>
-          <VisitsBarChart data={data.days} />
-        </section>
+        {hasData && (
+          <>
+            {/* Charts grid */}
+            <div className="grid gap-6 lg:grid-cols-3">
+              <section className="rounded-2xl border bg-card shadow-sm p-5 lg:col-span-2">
+                <header className="flex items-center justify-between mb-2">
+                  <div>
+                    <h2 className="font-semibold">Revenue & orders</h2>
+                    <p className="text-xs text-muted-foreground">Last 30 days</p>
+                  </div>
+                </header>
+                <RevenueAreaChart data={data.days} />
+              </section>
+              <section className="rounded-2xl border bg-card shadow-sm p-5">
+                <header className="mb-2">
+                  <h2 className="font-semibold">Sales by category</h2>
+                  <p className="text-xs text-muted-foreground">Share of 30-day revenue</p>
+                </header>
+                <CategoryPieChart data={data.categoryBreakdown} />
+              </section>
+            </div>
+
+            <section className="rounded-2xl border bg-card shadow-sm p-5">
+              <header className="mb-2">
+                <h2 className="font-semibold">Site traffic</h2>
+                <p className="text-xs text-muted-foreground">Page views per day</p>
+              </header>
+              <VisitsBarChart data={data.days} />
+            </section>
+          </>
+        )}
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section className="rounded-2xl border bg-card shadow-sm">

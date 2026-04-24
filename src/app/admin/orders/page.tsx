@@ -1,5 +1,8 @@
+import Link from "next/link";
+import { Plus } from "lucide-react";
 import { AdminTopbar } from "@/components/admin/topbar";
-import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
 import { getAdminDashboard } from "@/lib/admin-data";
 import { formatDateTime, formatKES } from "@/lib/utils";
 import type { OrderStatus } from "@/types";
@@ -22,6 +25,15 @@ export default async function AdminOrdersPage() {
     <>
       <AdminTopbar title="Orders" subtitle={`${recentOrders.length} recent orders`} />
       <div className="p-4 sm:p-6">
+        <div className="mb-4 flex justify-end">
+          <Button asChild variant="gradient">
+            <Link href="/admin/orders/new">
+              <Plus className="size-4" />
+              New Order
+            </Link>
+          </Button>
+        </div>
+        
         <div className="rounded-2xl border bg-card shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -30,9 +42,9 @@ export default async function AdminOrdersPage() {
                   <th className="p-3 text-left font-semibold">Reference</th>
                   <th className="p-3 text-left font-semibold">Customer</th>
                   <th className="p-3 text-left font-semibold hidden md:table-cell">Placed</th>
-                  <th className="p-3 text-left font-semibold hidden sm:table-cell">Payment</th>
                   <th className="p-3 text-right font-semibold">Total</th>
-                  <th className="p-3 text-left font-semibold">Status</th>
+                  <th className="p-3 text-left font-semibold">Order Status</th>
+                  <th className="p-3 text-left font-semibold">Payment Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
@@ -41,26 +53,29 @@ export default async function AdminOrdersPage() {
                     <td className="p-3 font-medium">{o.reference}</td>
                     <td className="p-3">
                       <p className="font-medium">{o.customer_name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {o.customer_email}
-                      </p>
+                      {o.customer_phone && (
+                        <p className="text-xs text-muted-foreground">
+                          📱 {o.customer_phone}
+                        </p>
+                      )}
+                      {o.customer_email && (
+                        <p className="text-xs text-muted-foreground">
+                          ✉️ {o.customer_email}
+                        </p>
+                      )}
                     </td>
                     <td className="p-3 hidden md:table-cell text-muted-foreground">
                       {formatDateTime(o.created_at)}
                     </td>
-                    <td className="p-3 hidden sm:table-cell capitalize">
-                      {o.payment_method.replace("_", " ")}
-                      <div className="text-xs text-muted-foreground capitalize">
-                        {o.payment_status}
-                      </div>
-                    </td>
                     <td className="p-3 text-right font-semibold">
                       {formatKES(o.total)}
                     </td>
-                    <td className="p-3">
-                      <Badge variant={statusVariant[o.status]} className="capitalize">
-                        {o.status}
-                      </Badge>
+                    <td className="p-3" colSpan={2}>
+                      <OrderStatusUpdater
+                        orderId={o.id}
+                        currentStatus={o.status}
+                        currentPaymentStatus={o.payment_status}
+                      />
                     </td>
                   </tr>
                 ))}

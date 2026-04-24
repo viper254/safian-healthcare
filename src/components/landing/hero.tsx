@@ -90,7 +90,7 @@ const categoryChips = [
 
 const trustBadges = [
   { icon: ShieldCheck, label: "Certified medical-grade" },
-  { icon: Truck, label: "Countrywide delivery" },
+  { icon: Truck, label: "Delivery: 24hrs-4 days" },
   { icon: CreditCard, label: "M-Pesa · Card · COD" },
 ];
 
@@ -246,7 +246,7 @@ export function Hero() {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="absolute top-4 left-4 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow"
               >
-                Free delivery · Orders over KES 15,000
+                Free delivery · Orders over KES 25,000
               </motion.div>
             </motion.div>
           </AnimatePresence>

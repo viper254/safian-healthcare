@@ -119,10 +119,18 @@ export async function getProductBySlug(slug: string): Promise<Product | undefine
       .from("products")
       .select("*, media:product_images(*)")
       .eq("slug", slug)
-      .eq("is_active", true)
       .maybeSingle();
 
-    if (error || !data) return undefined;
+    if (error) {
+      console.error("Error fetching product by slug:", error);
+      return undefined;
+    }
+    
+    if (!data) {
+      console.log(`No product found with slug: ${slug}`);
+      return undefined;
+    }
+    
     return mapProduct(data as AnyRecord, cats);
   } catch (error) {
     console.error("Error fetching product:", error);

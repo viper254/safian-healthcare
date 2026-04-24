@@ -24,6 +24,7 @@ import { ReviewsTicker } from "./reviews-ticker";
 const primaryNav = [
   { href: "/", label: "Home" },
   { href: "/shop", label: "Shop" },
+  { href: "/track-order", label: "Track Order" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
@@ -62,20 +63,24 @@ export function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch featured reviews
+  // Fetch featured reviews (defer to reduce initial load)
   useEffect(() => {
-    const supabase = createSupabaseBrowserClient();
-    
-    supabase
-      .from("reviews")
-      .select("id, customer_name, rating, review_text")
-      .eq("is_approved", true)
-      .eq("is_featured", true)
-      .order("created_at", { ascending: false })
-      .limit(10)
-      .then(({ data }) => {
-        if (data) setReviews(data);
-      });
+    const timer = setTimeout(() => {
+      const supabase = createSupabaseBrowserClient();
+      
+      supabase
+        .from("reviews")
+        .select("id, customer_name, rating, review_text")
+        .eq("is_approved", true)
+        .eq("is_featured", true)
+        .order("created_at", { ascending: false })
+        .limit(10)
+        .then(({ data }) => {
+          if (data) setReviews(data);
+        });
+    }, 1000); // Delay by 1 second
+
+    return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
@@ -99,7 +104,7 @@ export function Header() {
       <div className="bg-brand-gradient text-white text-[12px]">
         <div className="container flex h-8 items-center justify-between gap-3">
           <span className="truncate">
-            Nationwide delivery · Free over KES 15,000 · Bulk orders welcome
+            Nationwide delivery · Free over KES 25,000 · Deliveries within 24hrs-4 working days
           </span>
           <Link
             href="/contact"
@@ -125,9 +130,10 @@ export function Header() {
 
         <nav className="hidden lg:flex items-center gap-1">
           {primaryNav.map((item) => {
-            const active =
+            const active = mounted && (
               pathname === item.href ||
-              (item.href !== "/" && pathname?.startsWith(item.href));
+              (item.href !== "/" && pathname?.startsWith(item.href))
+            );
             return (
               <Link
                 key={item.href}

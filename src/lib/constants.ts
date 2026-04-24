@@ -71,5 +71,30 @@ export const CATEGORY_ORDER: CategorySlug[] = [
   "home-care-patient-support-devices",
 ];
 
-export const DELIVERY_FEE_KES = 350;
-export const FREE_DELIVERY_OVER_KES = 15000;
+// Delivery fee structure
+export const DELIVERY_FEES = {
+  NAIROBI: 200,
+  MAJOR_TOWNS: 300,
+  DEFAULT: 350,
+};
+
+export const FREE_DELIVERY_OVER_KES = 25000;
+
+// Major towns with fixed delivery fee
+export const MAJOR_TOWNS = [
+  "Mombasa",
+  "Kisumu",
+  "Nakuru",
+  "Eldoret",
+  "Thika",
+  "Malindi",
+  "Kitale",
+  "Garissa",
+  "Kakamega",
+  "Nyeri",
+  "Meru",
+  "Naivasha",
+];
+
+// Legacy constants for backward compatibility
+export const DELIVERY_FEE_KES = DELIVERY_FEES.DEFAULT;

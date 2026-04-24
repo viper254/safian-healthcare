@@ -14,13 +14,18 @@ interface Category {
   name: string;
 }
 
+interface ImageFile {
+  file: File;
+  preview: string;
+}
+
 export function ProductForm({ productId }: { productId?: string }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [categories, setCategories] = useState<Category[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [previews, setPreviews] = useState<string[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -65,6 +70,34 @@ export function ProductForm({ productId }: { productId?: string }) {
     }
   }, [formData.name, productId]);
 
+  // Handle clipboard paste
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      const newImages: ImageFile[] = [];
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf("image") !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            newImages.push({
+              file,
+              preview: URL.createObjectURL(file)
+            });
+          }
+        }
+      }
+
+      if (newImages.length > 0) {
+        setImages(prev => [...prev, ...newImages]);
+      }
+    };
+
+    window.addEventListener("paste", handlePaste);
+    return () => window.removeEventListener("paste", handlePaste);
+  }, []);
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
@@ -77,18 +110,21 @@ export function ProductForm({ productId }: { productId?: string }) {
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
-    const urls = files.map(file => URL.createObjectURL(file));
-    setPreviews(prev => [...prev, ...urls]);
-  }
-
-  function removePreview(index: number) {
-    URL.revokeObjectURL(previews[index]);
-    setPreviews(prev => prev.filter((_, i) => i !== index));
+    const newImages = files.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }));
+    setImages(prev => [...prev, ...newImages]);
     
-    // Reset file input
+    // Reset file input so the same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  function removeImage(index: number) {
+    URL.revokeObjectURL(images[index].preview);
+    setImages(prev => prev.filter((_, i) => i !== index));
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -131,13 +167,12 @@ export function ProductForm({ productId }: { productId?: string }) {
       const product = result;
 
       // Handle image uploads if any
-      if (fileInputRef.current?.files && fileInputRef.current.files.length > 0) {
+      if (images.length > 0) {
         const supabase = createSupabaseBrowserClient();
-        const files = Array.from(fileInputRef.current.files);
         
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const fileExt = file.name.split(".").pop();
+        for (let i = 0; i < images.length; i++) {
+          const { file } = images[i];
+          const fileExt = file.name.split(".").pop() || "png";
           const fileName = `${product.id}/${Date.now()}-${i}.${fileExt}`;
 
           // Upload to Supabase Storage
@@ -362,32 +397,67 @@ export function ProductForm({ productId }: { productId?: string }) {
         {/* Images */}
         <div>
           <Label htmlFor="images">Product Images</Label>
-          <Input
-            id="images"
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            multiple
-            onChange={handleFileChange}
-            className="cursor-pointer"
-          />
-          <p className="text-xs text-muted-foreground mt-1">
-            Upload product images (multiple allowed)
-          </p>
+          <div 
+            className="mt-1 border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 transition-colors hover:border-primary/50 group"
+            onDragOver={(e) => e.preventDefault()}
+            onDrop={(e) => {
+              e.preventDefault();
+              const files = Array.from(e.dataTransfer.files);
+              const newImages = files.filter(f => f.type.startsWith("image/")).map(file => ({
+                file,
+                preview: URL.createObjectURL(file)
+              }));
+              setImages(prev => [...prev, ...newImages]);
+            }}
+          >
+            <div className="flex flex-col items-center justify-center gap-2 text-center">
+              <div className="size-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+              </div>
+              <div className="text-sm">
+                <button 
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="text-primary font-semibold hover:underline"
+                >
+                  Click to upload
+                </button>
+                {" "}or drag and drop
+              </div>
+              <p className="text-xs text-muted-foreground">
+                PNG, JPG, GIF up to 10MB. <span className="font-medium text-primary">Pro tip: You can also paste images directly!</span>
+              </p>
+            </div>
+            <input
+              id="images"
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              className="hidden"
+            />
+          </div>
 
           {/* Image Previews */}
-          {previews.length > 0 && (
-            <div className="grid grid-cols-4 gap-2 mt-3">
-              {previews.map((url, i) => (
-                <div key={i} className="relative aspect-square rounded-lg overflow-hidden border">
-                  <img src={url} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
-                  <button
-                    type="button"
-                    onClick={() => removePreview(i)}
-                    className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                  >
-                    ✕
-                  </button>
+          {images.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
+              {images.map((img, i) => (
+                <div key={i} className="relative aspect-square rounded-xl overflow-hidden border bg-muted group">
+                  <img src={img.preview} alt={`Preview ${i + 1}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      type="button"
+                      onClick={() => removeImage(i)}
+                      className="bg-destructive text-destructive-foreground rounded-full p-2 hover:scale-110 transition-transform"
+                      title="Remove image"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
+                    </button>
+                  </div>
+                  <div className="absolute bottom-1 left-1 bg-black/60 text-white text-[10px] px-1.5 py-0.5 rounded">
+                    {i === 0 ? "Main" : `Image ${i + 1}`}
+                  </div>
                 </div>
               ))}
             </div>
@@ -426,8 +496,8 @@ export function ProductForm({ productId }: { productId?: string }) {
         </div>
       </div>
 
-      <div className="flex gap-3">
-        <Button type="submit" disabled={loading}>
+      <div className="flex gap-3 pt-4">
+        <Button type="submit" disabled={loading} className="px-8">
           {loading ? "Creating..." : "Create Product"}
         </Button>
         <Button

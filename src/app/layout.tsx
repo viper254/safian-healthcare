@@ -86,9 +86,12 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  icons: { 
-    icon: "/favicon.ico", 
-    apple: "/favicon.ico",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/icon.jpeg", type: "image/jpeg" },
+    ],
+    apple: "/logo.jpeg",
     shortcut: "/favicon.ico",
   },
   verification: {

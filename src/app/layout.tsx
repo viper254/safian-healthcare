@@ -5,6 +5,8 @@ import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
 import { MobileBottomBar } from "@/components/layout/mobile-bottom-bar";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
+import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
+import { Suspense } from "react";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
 const inter = Inter({
@@ -112,6 +114,9 @@ export default function RootLayout({
         <Footer />
         <MobileBottomBar />
         <WhatsAppFab />
+        <Suspense fallback={null}>
+          <AnalyticsTracker />
+        </Suspense>
       </body>
     </html>
   );

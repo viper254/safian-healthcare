@@ -74,6 +74,18 @@ export async function getAdminDashboard() {
       });
     });
 
+    // Get analytics events for visits
+    const { data: events } = await supabase
+      .from("analytics_events")
+      .select("created_at")
+      .gte("created_at", thirtyDaysAgo.toISOString());
+
+    const visitMap = new Map<string, number>();
+    (events || []).forEach((e) => {
+      const day = e.created_at.split("T")[0];
+      visitMap.set(day, (visitMap.get(day) || 0) + 1);
+    });
+
     const days = Array.from({ length: 30 }).map((_, i) => {
       const date = new Date(Date.now() - (29 - i) * 86400000).toISOString().split("T")[0];
       const stats = dayMap.get(date) ?? { revenue: 0, orders: 0 };
@@ -82,7 +94,7 @@ export async function getAdminDashboard() {
         label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         revenue: stats.revenue,
         orders: stats.orders,
-        visits: Math.floor(Math.random() * 100) + 50, // TODO: Implement real analytics
+        visits: visitMap.get(date) || 0,
       };
     });
 

@@ -137,23 +137,26 @@ export default function CheckoutPage() {
       
       // Prepare WhatsApp message with order reference
       const itemsList = lines
-        .map((l) => `• ${l.name}\n  (${formatKES(l.unit_price)} x ${l.quantity})`)
+        .map((l) => `* ${l.name}\n  (${formatKES(l.unit_price)} x ${l.quantity})`)
         .join("\n\n");
+      
+      // Get the first product image for preview if available
+      const firstItemImage = lines[0]?.image ? `\n\nProduct Image: ${lines[0].image}` : "";
       
       const message = `*NEW ORDER: ${orderReference}*
 
 *Customer Details:*
-👤 Name: ${name}
-📞 Phone: ${phone}
-📍 City: ${city}
+Name: ${name}
+Phone: ${phone}
+City: ${city}
 
 *Order Items:*
 ${itemsList}
 
 *Summary:*
-💰 Subtotal: ${formatKES(sub)}
-🚚 Delivery: ${delivery === 0 ? "FREE" : formatKES(delivery)}
-✅ *Total: ${formatKES(total)}*
+Subtotal: ${formatKES(sub)}
+Delivery: ${delivery === 0 ? "FREE" : formatKES(delivery)}
+*Total: ${formatKES(total)}*${firstItemImage}
 
 Please confirm availability and delivery. Thank you!`;
       

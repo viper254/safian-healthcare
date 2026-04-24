@@ -19,20 +19,29 @@ function mapProduct(row: AnyRecord, categories: Category[]): Product {
     description: row.description as string,
     brand: (row.brand as string) || "",
     sku: (row.sku as string) || "",
+    category_id: row.category_id as string,
     category: cat
-      ? { id: cat.id, slug: cat.slug, name: cat.name }
+      ? { 
+          id: cat.id, 
+          slug: cat.slug, 
+          name: cat.name,
+          description: null,
+          icon: null,
+          image_url: null,
+          sort_order: 0,
+          created_at: ""
+        }
       : undefined,
     original_price: Number(row.original_price),
-    discounted_price: row.discounted_price
-      ? Number(row.discounted_price)
-      : undefined,
-    offer_price: row.offer_price ? Number(row.offer_price) : undefined,
+    discounted_price: row.discounted_price ? Number(row.discounted_price) : null,
+    offer_price: row.offer_price ? Number(row.offer_price) : null,
+    offer_expires_at: row.offer_expires_at ? (row.offer_expires_at as string) : null,
     stock_quantity: Number(row.stock_quantity),
     low_stock_threshold: Number(row.low_stock_threshold ?? 5),
     is_featured: Boolean(row.is_featured),
     is_active: Boolean(row.is_active),
     tags: (row.tags as string[]) || [],
-    specs: (row.specs as Record<string, unknown>) || {},
+    specs: (row.specs as Record<string, string>) || {},
     rating_avg: Number(row.rating_avg ?? 0),
     rating_count: Number(row.rating_count ?? 0),
     images: Array.isArray(row.media)

@@ -30,7 +30,7 @@ export async function getAdminDashboard() {
 
     const { count: customerCount } = await supabase
       .from("profiles")
-      .select("*", { count: "only", head: true })
+      .select("*", { count: "exact", head: true })
       .eq("role", "customer");
 
     if (paidOrdersError || allOrdersError) throw paidOrdersError || allOrdersError;

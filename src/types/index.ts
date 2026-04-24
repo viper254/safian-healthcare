@@ -11,6 +11,7 @@ export interface Category {
   name: string;
   description: string | null;
   icon: string | null;
+  image_url: string | null;
   sort_order: number;
   created_at: string;
 }
@@ -67,7 +68,7 @@ export type OrderStatus =
   | "delivered"
   | "cancelled";
 
-export type PaymentStatus = "unpaid" | "paid" | "refunded";
+export type PaymentStatus = "unpaid" | "paid" | "refunded" | "failed";
 
 export type PaymentMethod = "mpesa" | "card" | "cash_on_delivery" | "bank_transfer";
 

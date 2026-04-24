@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Phone, Mail } from "lucide-react";
+import { Plus, Phone, Mail, ExternalLink } from "lucide-react";
 import { AdminTopbar } from "@/components/admin/topbar";
 import { Button } from "@/components/ui/button";
 import { OrderStatusUpdater } from "@/components/admin/order-status-updater";
@@ -41,6 +41,7 @@ export default async function AdminOrdersPage() {
                 <tr>
                   <th className="p-3 text-left font-semibold">Reference</th>
                   <th className="p-3 text-left font-semibold">Customer</th>
+                  <th className="p-3 text-left font-semibold">Items</th>
                   <th className="p-3 text-left font-semibold hidden md:table-cell">Placed</th>
                   <th className="p-3 text-right font-semibold">Total</th>
                   <th className="p-3 text-left font-semibold">Order Status</th>
@@ -63,6 +64,25 @@ export default async function AdminOrdersPage() {
                           <Mail className="size-3" /> {o.customer_email}
                         </p>
                       )}
+                    </td>
+                    <td className="p-3">
+                      <div className="space-y-1 max-w-[250px]">
+                        {o.order_items?.map((item: any) => (
+                          <div key={item.id} className="text-xs">
+                            <Link 
+                              href={`/product/${item.products?.slug}`}
+                              target="_blank"
+                              className="text-brand-blue-600 hover:underline flex items-center gap-1 font-medium"
+                            >
+                              {item.products?.name}
+                              <ExternalLink className="size-2.5" />
+                            </Link>
+                            <p className="text-muted-foreground">
+                              {item.quantity} x {formatKES(item.unit_price)}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
                     </td>
                     <td className="p-3 hidden md:table-cell text-muted-foreground">
                       {formatDateTime(o.created_at)}

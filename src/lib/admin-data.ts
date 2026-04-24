@@ -142,12 +142,27 @@ export async function getAdminDashboard() {
       image: null,
     }));
 
-    // Get recent orders
+    // Get recent orders with items and product details
     const { data: recentOrdersData } = await supabase
       .from("orders")
-      .select("*")
+      .select(`
+        *,
+        order_items (
+          id,
+          quantity,
+          unit_price,
+          line_total,
+          product_id,
+          products (
+            id,
+            name,
+            slug,
+            brand
+          )
+        )
+      `)
       .order("created_at", { ascending: false })
-      .limit(6);
+      .limit(10);
 
     return {
       kpis: {
@@ -159,7 +174,7 @@ export async function getAdminDashboard() {
       days,
       categoryBreakdown,
       topProducts,
-      recentOrders: (recentOrdersData || []) as Order[],
+      recentOrders: (recentOrdersData || []) as any[],
     };
   } catch (error) {
     console.error("Error fetching admin dashboard:", error);

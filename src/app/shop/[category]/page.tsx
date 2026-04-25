@@ -10,12 +10,13 @@ import type { CategorySlug } from "@/types";
 export const revalidate = 60;
 
 export async function generateMetadata(
-  { params }: { params: { category: string } },
+  { params }: { params: Promise<{ category: string }> },
 ): Promise<Metadata> {
+  const { category } = await params;
   const categories = await getCategories();
-  const dbCat = categories.find((c) => c.slug === params.category);
+  const dbCat = categories.find((c) => c.slug === category);
   const meta = (CATEGORY_META as Record<string, { name: string; description: string }>)[
-    params.category
+    category
   ];
   const name = dbCat?.name || meta?.name;
   const description = dbCat?.description || meta?.description;
@@ -30,17 +31,19 @@ export default async function CategoryPage({
   params,
   searchParams,
 }: {
-  params: { category: string };
-  searchParams?: { q?: string };
+  params: Promise<{ category: string }>;
+  searchParams?: Promise<{ q?: string }>;
 }) {
+  const { category } = await params;
+  const sp = (await searchParams) ?? {};
   const meta = (CATEGORY_META as Record<string, { name: string; description: string; image: string }>)[
-    params.category
+    category
   ];
   const [products, categories] = await Promise.all([
-    getProductsByCategory(params.category),
+    getProductsByCategory(category),
     getCategories(),
   ]);
-  const dbCat = categories.find((c) => c.slug === params.category);
+  const dbCat = categories.find((c) => c.slug === category);
   if (!dbCat && !meta) return notFound();
   const name = dbCat?.name || meta?.name || "";
   const description = dbCat?.description || meta?.description || "";
@@ -79,8 +82,8 @@ export default async function CategoryPage({
         <ShopGrid
           products={products}
           categories={categories}
-          activeCategorySlug={params.category as CategorySlug}
-          initialSearch={searchParams?.q ?? ""}
+          activeCategorySlug={category as CategorySlug}
+          initialSearch={sp.q ?? ""}
         />
       </div>
     </div>

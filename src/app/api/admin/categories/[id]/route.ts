@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function PATCH(
@@ -47,6 +48,13 @@ export async function PATCH(
       console.error("Error updating category:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    if (data?.slug) {
+      revalidatePath(`/shop/${data.slug}`);
+    }
+    revalidatePath("/admin/categories");
 
     return NextResponse.json(data);
   } catch (error) {
@@ -100,16 +108,25 @@ export async function DELETE(
       );
     }
 
-    // Delete category
-    const { error } = await supabase
+    // Delete category and return the deleted row so we can revalidate its slug page.
+    const { data: deleted, error } = await supabase
       .from("categories")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("slug")
+      .maybeSingle();
 
     if (error) {
       console.error("Error deleting category:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    if (deleted?.slug) {
+      revalidatePath(`/shop/${deleted.slug}`);
+    }
+    revalidatePath("/admin/categories");
 
     return NextResponse.json({ success: true });
   } catch (error) {

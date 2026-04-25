@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export async function PATCH(
@@ -47,6 +48,13 @@ export async function PATCH(
       console.error("Error updating category:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    if (data?.slug) {
+      revalidatePath(`/shop/${data.slug}`);
+    }
+    revalidatePath("/admin/categories");
 
     return NextResponse.json(data);
   } catch (error) {
@@ -110,6 +118,10 @@ export async function DELETE(
       console.error("Error deleting category:", error);
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
+
+    revalidatePath("/");
+    revalidatePath("/shop");
+    revalidatePath("/admin/categories");
 
     return NextResponse.json({ success: true });
   } catch (error) {

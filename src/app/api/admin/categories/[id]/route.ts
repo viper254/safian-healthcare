@@ -108,11 +108,13 @@ export async function DELETE(
       );
     }
 
-    // Delete category
-    const { error } = await supabase
+    // Delete category and return the deleted row so we can revalidate its slug page.
+    const { data: deleted, error } = await supabase
       .from("categories")
       .delete()
-      .eq("id", id);
+      .eq("id", id)
+      .select("slug")
+      .maybeSingle();
 
     if (error) {
       console.error("Error deleting category:", error);
@@ -121,6 +123,9 @@ export async function DELETE(
 
     revalidatePath("/");
     revalidatePath("/shop");
+    if (deleted?.slug) {
+      revalidatePath(`/shop/${deleted.slug}`);
+    }
     revalidatePath("/admin/categories");
 
     return NextResponse.json({ success: true });

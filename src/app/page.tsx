@@ -5,21 +5,22 @@ import { FeaturedBundles } from "@/components/landing/featured-bundles";
 import { FeaturedProducts } from "@/components/landing/featured-products";
 import { WhyUs } from "@/components/landing/why-us";
 import { CallToAction } from "@/components/landing/cta";
-import { getFeaturedProducts, getProducts } from "@/lib/data";
+import { getCategories, getFeaturedProducts, getProducts } from "@/lib/data";
 
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const [featured, allProducts] = await Promise.all([
+  const [featured, allProducts, categories] = await Promise.all([
     getFeaturedProducts(),
     getProducts({ limit: 20 }),
+    getCategories(),
   ]);
   
   return (
     <>
       <Hero />
       <MarqueeStrip />
-      <CategoriesShowcase />
+      <CategoriesShowcase categories={categories} />
       <FeaturedBundles products={allProducts} />
       <FeaturedProducts products={featured} />
       <WhyUs />

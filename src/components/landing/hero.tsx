@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight,
   Stethoscope,
@@ -16,8 +16,10 @@ import {
   BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import type { Category, CategorySlug } from "@/types";
 
 type Slide = {
+  slug: CategorySlug;
   eyebrow: string;
   titleTop: string;
   titleAccent: string;
@@ -29,6 +31,7 @@ type Slide = {
 
 const slides: Slide[] = [
   {
+    slug: "diagnostic-essentials",
     eyebrow: "Diagnostic Essentials",
     titleTop: "Essential tools for",
     titleAccent: "accurate diagnosis",
@@ -39,6 +42,7 @@ const slides: Slide[] = [
     tintTo: "to-brand-orange-500/20",
   },
   {
+    slug: "procedure-practical-kits",
     eyebrow: "Procedure & Practical Kits",
     titleTop: "Hands-on training",
     titleAccent: "kits for students",
@@ -49,6 +53,7 @@ const slides: Slide[] = [
     tintTo: "to-brand-green-500/20",
   },
   {
+    slug: "medical-wear-protective-gear",
     eyebrow: "Medical Wear & Protective Gear",
     titleTop: "Professional attire",
     titleAccent: "for healthcare workers",
@@ -59,6 +64,7 @@ const slides: Slide[] = [
     tintTo: "to-brand-orange-500/25",
   },
   {
+    slug: "clinical-academic-support-tools",
     eyebrow: "Clinical & Academic Support",
     titleTop: "Academic excellence",
     titleAccent: "support tools",
@@ -69,6 +75,7 @@ const slides: Slide[] = [
     tintTo: "to-brand-green-500/20",
   },
   {
+    slug: "home-care-patient-support-devices",
     eyebrow: "Home Care & Patient Support",
     titleTop: "Quality care",
     titleAccent: "at home",
@@ -94,13 +101,25 @@ const trustBadges = [
   { icon: CreditCard, label: "M-Pesa · Card · COD" },
 ];
 
-export function Hero() {
+export function Hero({ categories = [] }: { categories?: Category[] }) {
   const [idx, setIdx] = useState(0);
+  // Override each slide's image with the matching DB category's image_url so admin edits show.
+  const effectiveSlides = useMemo<Slide[]>(() => {
+    if (categories.length === 0) return slides;
+    const bySlug = new Map(categories.map((c) => [c.slug, c]));
+    return slides.map((slide) => {
+      const cat = bySlug.get(slide.slug);
+      return cat?.image_url ? { ...slide, image: cat.image_url } : slide;
+    });
+  }, [categories]);
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % slides.length), 5000);
+    const t = setInterval(
+      () => setIdx((i) => (i + 1) % effectiveSlides.length),
+      5000,
+    );
     return () => clearInterval(t);
-  }, []);
-  const s = slides[idx];
+  }, [effectiveSlides.length]);
+  const s = effectiveSlides[idx] ?? effectiveSlides[0];
   return (
     <section className="relative overflow-hidden bg-background">
       {/* Decorative tinted blobs */}
@@ -182,7 +201,7 @@ export function Hero() {
 
           {/* Slide dots */}
           <div className="mt-8 flex items-center gap-2">
-            {slides.map((_, i) => (
+            {effectiveSlides.map((_, i) => (
               <button
                 key={i}
                 aria-label={`Go to slide ${i + 1}`}

@@ -111,16 +111,22 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
   // Fetch settings
   useEffect(() => {
     const supabase = createSupabaseBrowserClient();
-    supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "free_threshold")
-      .single()
-      .then(({ data }) => {
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "free_threshold")
+          .single();
+        
         if (data?.value) {
           setFreeDeliveryThreshold(parseInt(data.value));
         }
-      });
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+      }
+    };
+    fetchSettings();
   }, []);
 
   // Override each slide's image with the matching DB category's image_url so admin edits show.

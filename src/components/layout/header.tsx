@@ -69,16 +69,23 @@ export function Header() {
     const supabase = createSupabaseBrowserClient();
     
     // Fetch free delivery threshold from settings table
-    supabase
-      .from("settings")
-      .select("value")
-      .eq("key", "free_threshold")
-      .single()
-      .then(({ data }) => {
+    const fetchSettings = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("settings")
+          .select("value")
+          .eq("key", "free_threshold")
+          .single();
+        
         if (data?.value) {
           setFreeDeliveryThreshold(parseInt(data.value));
         }
-      });
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+      }
+    };
+
+    fetchSettings();
 
     // Fetch featured reviews
     const timer = setTimeout(() => {
@@ -126,7 +133,6 @@ export function Header() {
               <circle cx="18.5" cy="18.5" r="2.5"></circle>
             </svg>
             <span className="text-sm font-semibold">
-              <span className="hidden sm:inline">🎉 </span>
               FREE Delivery over {formatKES(freeDeliveryThreshold)}
               <span className="hidden md:inline"> · Fast 24hrs-4 days nationwide</span>
             </span>

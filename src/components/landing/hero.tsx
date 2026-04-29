@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { Category, CategorySlug } from "@/types";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
+import { FREE_DELIVERY_OVER_KES } from "@/lib/constants";
+import { formatKES } from "@/lib/utils";
 
 type Slide = {
   slug: CategorySlug;
@@ -103,6 +106,23 @@ const trustBadges = [
 
 export function Hero({ categories = [] }: { categories?: Category[] }) {
   const [idx, setIdx] = useState(0);
+  const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(FREE_DELIVERY_OVER_KES);
+
+  // Fetch settings
+  useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "free_threshold")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          setFreeDeliveryThreshold(parseInt(data.value));
+        }
+      });
+  }, []);
+
   // Override each slide's image with the matching DB category's image_url so admin edits show.
   const effectiveSlides = useMemo<Slide[]>(() => {
     if (categories.length === 0) return slides;
@@ -112,6 +132,7 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
       return cat?.image_url ? { ...slide, image: cat.image_url } : slide;
     });
   }, [categories]);
+
   useEffect(() => {
     const t = setInterval(
       () => setIdx((i) => (i + 1) % effectiveSlides.length),
@@ -119,7 +140,9 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
     );
     return () => clearInterval(t);
   }, [effectiveSlides.length]);
+
   const s = effectiveSlides[idx] ?? effectiveSlides[0];
+
   return (
     <section className="relative overflow-hidden bg-background">
       {/* Decorative tinted blobs */}
@@ -265,7 +288,7 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="absolute top-4 left-4 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow"
               >
-                Free delivery · Orders over KES 25,000
+                Free delivery · Orders over {formatKES(freeDeliveryThreshold)}
               </motion.div>
             </motion.div>
           </AnimatePresence>

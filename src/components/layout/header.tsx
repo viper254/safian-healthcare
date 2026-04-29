@@ -15,9 +15,9 @@ import {
 import { Logo } from "@/components/brand/logo";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { cn } from "@/lib/utils";
+import { cn, formatKES } from "@/lib/utils";
 import { useCart } from "@/store/cart-store";
-import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/constants";
+import { CATEGORY_META, CATEGORY_ORDER, FREE_DELIVERY_OVER_KES } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { ReviewsTicker } from "./reviews-ticker";
 
@@ -36,6 +36,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [reviews, setReviews] = useState<any[]>([]);
+  const [freeDeliveryThreshold, setFreeDeliveryThreshold] = useState(FREE_DELIVERY_OVER_KES);
   const count = useCart((s) => s.totalQty());
 
   useEffect(() => {
@@ -63,11 +64,24 @@ export function Header() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Fetch featured reviews (defer to reduce initial load)
+  // Fetch settings and reviews
   useEffect(() => {
+    const supabase = createSupabaseBrowserClient();
+    
+    // Fetch free delivery threshold from settings table
+    supabase
+      .from("settings")
+      .select("value")
+      .eq("key", "free_threshold")
+      .single()
+      .then(({ data }) => {
+        if (data?.value) {
+          setFreeDeliveryThreshold(parseInt(data.value));
+        }
+      });
+
+    // Fetch featured reviews
     const timer = setTimeout(() => {
-      const supabase = createSupabaseBrowserClient();
-      
       supabase
         .from("reviews")
         .select("id, customer_name, rating, review_text")
@@ -78,7 +92,7 @@ export function Header() {
         .then(({ data }) => {
           if (data) setReviews(data);
         });
-    }, 1000); // Delay by 1 second
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -113,7 +127,7 @@ export function Header() {
             </svg>
             <span className="text-sm font-semibold">
               <span className="hidden sm:inline">🎉 </span>
-              FREE Delivery over KES 25,000
+              FREE Delivery over {formatKES(freeDeliveryThreshold)}
               <span className="hidden md:inline"> · Fast 24hrs-4 days nationwide</span>
             </span>
           </div>

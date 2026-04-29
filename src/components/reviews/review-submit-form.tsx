@@ -34,6 +34,8 @@ export function ReviewSubmitForm() {
         if (profile) {
           if (profile.full_name) setCustomerName(profile.full_name);
           if (profile.email) setCustomerEmail(profile.email);
+        } else if (user.email) {
+          setCustomerEmail(user.email);
         }
       }
     }
@@ -58,12 +60,11 @@ export function ReviewSubmitForm() {
 
     try {
       const supabase = createSupabaseBrowserClient();
-      const { data: { user } } = await supabase.auth.getUser();
       
+      // We remove user_id from the insert because it's not in the current schema
       const { error: submitError } = await supabase
         .from("reviews")
         .insert({
-          user_id: user?.id || null,
           customer_name: name,
           customer_email: email || null,
           rating,
@@ -80,6 +81,7 @@ export function ReviewSubmitForm() {
       setCustomerName("");
       setCustomerEmail("");
     } catch (err: any) {
+      console.error("Review submission error:", err);
       setError(err.message || "Failed to submit review");
     } finally {
       setLoading(false);

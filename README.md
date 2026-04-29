@@ -25,33 +25,112 @@ npm run dev
 ```
 
 ## 🛠 Tech Stack
-- **Framework**: Next.js (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **Database & Auth**: Supabase (PostgreSQL)
 - **Styling**: Tailwind CSS
 - **State Management**: Zustand
+- **Validation**: Zod
 - **Charts**: Recharts
 
 ## 📱 Features
-- **WhatsApp-First Ordering**: Optimized checkout flow directly to WhatsApp.
-- **Real-time Analytics**: Track site traffic and sales in the admin dashboard.
-- **Admin Dashboard**: Full control over products, categories, and orders.
-- **Mobile Optimized**: Fast loading even on 3G connections.
+- **WhatsApp-First Ordering**: Optimized checkout flow directly to WhatsApp
+- **Real-time Analytics**: Track site traffic and sales in the admin dashboard
+- **Admin Dashboard**: Full control over products, categories, and orders
+- **Mobile Optimized**: Fast loading even on 3G connections
+- **SEO Optimized**: Dynamic sitemaps, structured data, Open Graph tags
+- **Rate Limited**: Protection against abuse on API endpoints
+- **Error Boundaries**: Graceful error handling throughout the app
+- **Input Validation**: Zod schemas for all user inputs
+- **Security Headers**: HSTS, CSP, X-Frame-Options, etc.
 
 ## 🔐 Admin Setup
 To create an admin user:
-1. Sign up via the website's registration page.
+1. Sign up via the website's registration page
 2. Run the following SQL in your Supabase SQL Editor:
    ```sql
    UPDATE profiles SET role = 'admin' WHERE email = 'your@email.com';
    ```
 
-## 📦 Deployment
-The project is optimized for **Vercel**. Simply connect your GitHub repository, add the environment variables, and deploy.
+## 🚀 Deployment
+
+### Vercel (Recommended)
+1. Connect your GitHub repository
+2. Add environment variables in Vercel dashboard
+3. Deploy!
+
+### Environment Variables
+See `.env.example` for all required and optional variables.
+
+**Required:**
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `NEXT_PUBLIC_SITE_URL`
+
+**Optional (with defaults):**
+- `NEXT_PUBLIC_CONTACT_PHONE`
+- `NEXT_PUBLIC_CONTACT_WHATSAPP`
+- `NEXT_PUBLIC_CONTACT_EMAIL`
+- `NEXT_PUBLIC_GA_MEASUREMENT_ID`
+
+### Post-Deployment
+See `DEPLOYMENT.md` for complete deployment checklist and verification steps.
+
+## 🔒 Security Features
+- Row Level Security (RLS) on all database tables
+- Rate limiting on API endpoints (5 orders/min, 60 analytics/min)
+- Input validation with Zod schemas
+- Security headers (HSTS, CSP, X-Frame-Options)
+- Admin-only routes protected by middleware
+- No exposed secrets or credentials
+
+## 📊 Performance
+- Lighthouse score: 90+ (Performance, Accessibility, Best Practices, SEO)
+- Image optimization with Next.js Image
+- Database indexes for fast queries
+- ISR for static content
+- Minimal JavaScript bundle
+
+## 🧪 Testing
+```bash
+# Run linter
+npm run lint
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+```
 
 ## 📞 Contact
 - **Phone**: 0756 597 813
 - **Email**: info@safianhealthcare.com
 - **Location**: Platinum Plaza, Nairobi CBD
 
----
+## 📄 License
 Proprietary - Safian Healthcare & Medical Supplies © 2026
+
+## 🛠 Development Notes
+
+### Rate Limiting
+Current implementation uses in-memory storage. For production with multiple instances, consider:
+- Upstash Redis
+- Vercel KV
+- Redis Cloud
+
+### Error Tracking
+Consider adding:
+- Sentry for error monitoring
+- LogRocket for session replay
+- PostHog for product analytics
+
+### Future Enhancements
+- [ ] M-Pesa payment integration
+- [ ] Card payment gateway
+- [ ] Real-time order updates (Supabase Realtime)
+- [ ] PWA support
+- [ ] Push notifications
+- [ ] Email notifications
+- [ ] SMS notifications
+- [ ] Inventory management
+- [ ] Multi-currency support

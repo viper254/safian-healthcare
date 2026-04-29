@@ -33,32 +33,33 @@ export default function ContactPage() {
           action={`mailto:${COMPANY_CONTACT.email}`}
           method="post"
           encType="text/plain"
+          autoComplete="on"
         >
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">Full name</Label>
-              <Input id="name" name="name" required />
+              <Input id="name" name="name" autoComplete="name" required />
             </div>
             <div>
               <Label htmlFor="org">Organisation</Label>
-              <Input id="org" name="org" placeholder="Optional" />
+              <Input id="org" name="org" autoComplete="organization" placeholder="Optional" />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" name="email" type="email" required />
+              <Input id="email" name="email" type="email" autoComplete="email" required />
             </div>
             <div>
               <Label htmlFor="phone">Phone</Label>
-              <Input id="phone" name="phone" type="tel" required />
+              <Input id="phone" name="phone" type="tel" autoComplete="tel" required />
             </div>
           </div>
           <div>
             <Label htmlFor="subject">Subject</Label>
-            <Input id="subject" name="subject" required />
+            <Input id="subject" name="subject" autoComplete="off" required />
           </div>
           <div>
             <Label htmlFor="message">Message</Label>
-            <Textarea id="message" name="message" rows={6} required />
+            <Textarea id="message" name="message" rows={6} autoComplete="off" required />
           </div>
           <Button type="submit" variant="gradient" size="lg">
             Send message

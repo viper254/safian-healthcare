@@ -1,7 +1,34 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { z } from "zod";
+import { rateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
+
+const productSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters").max(200),
+  slug: z.string().min(2).max(200).regex(/^[a-z0-9-]+$/, "Slug must be lowercase with hyphens only"),
+  description: z.string().min(10, "Description must be at least 10 characters"),
+  short_description: z.string().max(200).optional().nullable(),
+  brand: z.string().max(100).optional().nullable(),
+  sku: z.string().max(100).optional().nullable(),
+  category_id: z.string().uuid("Invalid category ID").optional().nullable(),
+  original_price: z.number().positive("Price must be positive"),
+  discounted_price: z.number().positive().optional().nullable(),
+  offer_price: z.number().positive().optional().nullable(),
+  stock_quantity: z.number().int().nonnegative("Stock must be non-negative"),
+  low_stock_threshold: z.number().int().positive().default(5),
+  is_featured: z.boolean().default(false),
+  is_active: z.boolean().default(true),
+});
 
 export async function POST(request: Request) {
+  // Rate limiting
+  const identifier = getClientIdentifier(request);
+  const rateLimitResult = rateLimit(`admin:products:${identifier}`, RATE_LIMITS.api);
+  
+  if (!rateLimitResult.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   try {
     const supabase = await createSupabaseServerClient();
     
@@ -21,15 +48,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
-    // Create product
-    const body = await request.json();
+    // Validate input
+    const rawBody = await request.json();
+    const validation = productSchema.safeParse(rawBody);
     
+    if (!validation.success) {
+      return NextResponse.json({ 
+        error: "Validation failed", 
+        details: validation.error.issues 
+      }, { status: 400 });
+    }
+
+    const body = validation.data;
+
+    // Create product
     const { data, error } = await supabase
       .from("products")
       .insert({
         name: body.name,
         slug: body.slug,
-        description: body.description || "",
+        description: body.description,
         short_description: body.short_description || null,
         brand: body.brand || null,
         sku: body.sku || null,
@@ -38,16 +76,22 @@ export async function POST(request: Request) {
         discounted_price: body.discounted_price || null,
         offer_price: body.offer_price || null,
         stock_quantity: body.stock_quantity,
-        low_stock_threshold: body.low_stock_threshold || 5,
-        is_featured: body.is_featured || false,
-        is_active: body.is_active !== false,
+        low_stock_threshold: body.low_stock_threshold,
+        is_featured: body.is_featured,
+        is_active: body.is_active,
       })
       .select()
       .single();
 
     if (error) {
       console.error("Error creating product:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+      
+      // Handle specific errors
+      if (error.code === '23505') {
+        return NextResponse.json({ error: "Product with this slug or SKU already exists" }, { status: 409 });
+      }
+      
+      return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
     }
 
     return NextResponse.json(data);

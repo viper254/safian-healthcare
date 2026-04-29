@@ -18,6 +18,7 @@ import { Breadcrumbs } from "@/app/shop/page";
 import { effectivePrice, formatKES } from "@/lib/utils";
 import { AddToCartBar } from "@/components/shop/add-to-cart-bar";
 import { Badge } from "@/components/ui/badge";
+import { ProductSchema } from "@/components/seo/product-schema";
 
 export const revalidate = 60;
 
@@ -26,11 +27,59 @@ export async function generateMetadata(
 ): Promise<Metadata> {
   const { slug } = await context.params;
   const p = await getProductBySlug(slug);
-  if (!p) return { title: "Product not found" };
+  
+  if (!p) {
+    return { 
+      title: "Product not found",
+      robots: { index: false, follow: false }
+    };
+  }
+
+  const { price } = effectivePrice(p);
+  const description = p.short_description || p.description.slice(0, 155);
+  const imageUrl = p.images[0]?.url || "/logo.jpeg";
+
   return {
     title: p.name,
-    description: p.short_description ?? p.description.slice(0, 140),
-    openGraph: { images: p.images.map((i) => i.url) },
+    description,
+    keywords: [
+      p.name,
+      p.brand || "",
+      p.category?.name || "",
+      "medical supplies Kenya",
+      "healthcare equipment",
+      ...p.tags,
+    ].filter(Boolean),
+    openGraph: {
+      title: p.name,
+      description,
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: p.name,
+        },
+      ],
+      siteName: "Safian Healthcare & Medical Supplies",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: p.name,
+      description,
+      images: [imageUrl],
+    },
+    alternates: {
+      canonical: `/product/${slug}`,
+    },
+    other: {
+      "product:price:amount": price.toString(),
+      "product:price:currency": "KES",
+      "product:availability": p.stock_quantity > 0 ? "in stock" : "out of stock",
+      "product:condition": "new",
+      "product:brand": p.brand || "Safian Healthcare",
+    },
   };
 }
 
@@ -61,6 +110,8 @@ export default async function ProductPage(context: {
 
   return (
     <div className="container py-6 md:py-10">
+      <ProductSchema product={product} />
+      
       <Breadcrumbs
         items={[
           { label: "Home", href: "/" },

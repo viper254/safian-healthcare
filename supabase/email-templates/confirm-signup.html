@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Confirm Your Email - Safian Healthcare</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+      background-color: #f5f5f5;
+    }
+    .container {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+      background: linear-gradient(135deg, #6B9F3E 0%, #F68B1F 50%, #2B5C9E 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    h1 {
+      color: #1a1a1a;
+      font-size: 24px;
+      margin: 20px 0;
+    }
+    .button {
+      display: inline-block;
+      padding: 14px 32px;
+      background: linear-gradient(135deg, #6B9F3E 0%, #F68B1F 50%, #2B5C9E 100%);
+      color: #ffffff !important;
+      text-decoration: none;
+      border-radius: 50px;
+      font-weight: 600;
+      margin: 20px 0;
+      text-align: center;
+    }
+    .footer {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 1px solid #e0e0e0;
+      font-size: 14px;
+      color: #666;
+      text-align: center;
+    }
+    .contact {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">SAFIAN HEALTHCARE</div>
+    </div>
+    
+    <h1>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6B9F3E" stroke-width="2" style="vertical-align: middle; margin-right: 8px;">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      Welcome to Safian Healthcare!
+    </h1>
+    
+    <p>Thank you for creating an account with us. We're excited to have you join our community of healthcare professionals and students.</p>
+    
+    <p>To complete your registration and start shopping for quality medical supplies, please confirm your email address by clicking the button below:</p>
+    
+    <div style="text-align: center;">
+      <a href="{{ .ConfirmationURL }}" class="button">Confirm Email Address</a>
+    </div>
+    
+    <p style="font-size: 14px; color: #666; margin-top: 20px;">
+      If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="{{ .ConfirmationURL }}" style="color: #F68B1F; word-break: break-all;">{{ .ConfirmationURL }}</a>
+    </p>
+    
+    <p style="font-size: 14px; color: #666;">
+      This link will expire in 24 hours for security reasons.
+    </p>
+    
+    <div class="footer">
+      <p><strong>Safian Healthcare & Medical Supplies</strong></p>
+      <p>Trusted supplier of medical equipment across Kenya</p>
+      
+      <div class="contact">
+        <p>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+          </svg>
+          0756 597 813 | 
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="vertical-align: middle; margin: 0 4px;">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+            <polyline points="22,6 12,13 2,6"></polyline>
+          </svg>
+          info@safianhealthcare.com
+        </p>
+        <p>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+            <circle cx="12" cy="10" r="3"></circle>
+          </svg>
+          Platinum Plaza, Nairobi CBD
+        </p>
+        <p style="margin-top: 15px; font-size: 12px;">
+          If you didn't create this account, please ignore this email.
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -100,17 +100,32 @@ export function Header() {
       {/* Reviews Ticker */}
       <ReviewsTicker reviews={reviews} />
 
-      {/* Top announcement bar */}
-      <div className="bg-brand-gradient text-white text-[12px]">
-        <div className="container flex h-8 items-center justify-between gap-3">
-          <span className="truncate">
-            Nationwide delivery · Free over KES 25,000 · Deliveries within 24hrs-4 working days
-          </span>
+      {/* Top announcement bar - Eye-catching delivery banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-brand-green-600 via-brand-orange-500 to-brand-blue-600 text-white">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-30" />
+        <div className="container relative flex h-10 items-center justify-between gap-3">
+          <div className="flex items-center gap-2 animate-fade-in">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="shrink-0 animate-pulse">
+              <rect x="1" y="3" width="15" height="13"></rect>
+              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon>
+              <circle cx="5.5" cy="18.5" r="2.5"></circle>
+              <circle cx="18.5" cy="18.5" r="2.5"></circle>
+            </svg>
+            <span className="text-sm font-semibold">
+              <span className="hidden sm:inline">🎉 </span>
+              FREE Delivery over KES 25,000
+              <span className="hidden md:inline"> · Fast 24hrs-4 days nationwide</span>
+            </span>
+          </div>
           <Link
             href="/contact"
-            className="hidden sm:inline underline-offset-4 hover:underline"
+            className="hidden sm:inline-flex items-center gap-1 text-sm font-medium hover:underline underline-offset-4 transition-all hover:gap-2"
           >
             Get in touch
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+              <polyline points="12 5 19 12 12 19"></polyline>
+            </svg>
           </Link>
         </div>
       </div>

@@ -54,9 +54,21 @@ To create an admin user:
 ## 🚀 Deployment
 
 ### Vercel (Recommended)
-1. Connect your GitHub repository
-2. Add environment variables in Vercel dashboard
-3. Deploy!
+```bash
+npm install -g vercel
+vercel login
+vercel
+```
+
+Add environment variables in Vercel dashboard, then:
+```bash
+vercel --prod
+```
+
+### ⚠️ Important: Custom Domain Setup
+**Don't add to Google Search Console with the Vercel URL!** This will make Google show `your-site.vercel.app` instead of your brand name.
+
+**See [`CUSTOM_DOMAIN_SETUP.md`](CUSTOM_DOMAIN_SETUP.md) for step-by-step instructions.**
 
 ### Environment Variables
 See `.env.example` for all required and optional variables.
@@ -64,16 +76,13 @@ See `.env.example` for all required and optional variables.
 **Required:**
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-- `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_SITE_URL` (use your custom domain, not Vercel URL)
 
 **Optional (with defaults):**
 - `NEXT_PUBLIC_CONTACT_PHONE`
 - `NEXT_PUBLIC_CONTACT_WHATSAPP`
 - `NEXT_PUBLIC_CONTACT_EMAIL`
 - `NEXT_PUBLIC_GA_MEASUREMENT_ID`
-
-### Post-Deployment
-See `DEPLOYMENT.md` for complete deployment checklist and verification steps.
 
 ## 🔒 Security Features
 - Row Level Security (RLS) on all database tables

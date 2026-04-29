@@ -97,9 +97,7 @@ export const metadata: Metadata = {
     shortcut: "/favicon.ico",
   },
   verification: {
-    // Add your verification codes when ready
-    // google: "your-google-verification-code",
-    // yandex: "your-yandex-verification-code",
+    google: "20e8b0afe27f4f57",
   },
 };
 

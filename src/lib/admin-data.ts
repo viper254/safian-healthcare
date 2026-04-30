@@ -177,7 +177,9 @@ export async function getAdminDashboard() {
       recentOrders: (recentOrdersData || []) as any[],
     };
   } catch (error) {
-    console.error("Error fetching admin dashboard:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error fetching admin dashboard:", error);
+    }
     // Return empty state on error
     return {
       kpis: { revenue: 0, orders: 0, customers: 0, aov: 0 },

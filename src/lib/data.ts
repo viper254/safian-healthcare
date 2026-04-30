@@ -68,7 +68,9 @@ export async function getCategories(): Promise<Category[]> {
     if (error) throw error;
     return (data as Category[]) || [];
   } catch (error) {
-    console.error("Error fetching categories:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error fetching categories:", error);
+    }
     return [];
   }
 }
@@ -114,7 +116,9 @@ export async function getProducts(opts?: {
     if (error) throw error;
     return (data as AnyRecord[]).map((r) => mapProduct(r, cats));
   } catch (error) {
-    console.error("Error fetching products:", error);
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Error fetching products:", error);
+    }
     return [];
   }
 }

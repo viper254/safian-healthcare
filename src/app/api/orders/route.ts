@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 import type { CartLine, PaymentMethod } from "@/types";
 import { z } from "zod";
-import { rateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
 
 const cartLineSchema = z.object({
   product_id: z.string().uuid(),
@@ -41,23 +41,12 @@ function generateReference(): string {
 }
 
 export async function POST(request: Request) {
-  // Rate limiting
+  // Rate limiting - now edge-compatible
   const identifier = getClientIdentifier(request);
-  const rateLimitResult = rateLimit(`orders:${identifier}`, RATE_LIMITS.orders);
+  const rateLimitResult = checkRateLimit(`orders:${identifier}`, RATE_LIMITS.orders);
   
-  if (!rateLimitResult.success) {
-    return NextResponse.json(
-      { error: "Too many requests. Please try again later." },
-      { 
-        status: 429,
-        headers: {
-          'X-RateLimit-Limit': RATE_LIMITS.orders.maxRequests.toString(),
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': rateLimitResult.resetAt.toString(),
-        }
-      }
-    );
-  }
+  // Add rate limit headers to response
+  const rateLimitHeaders = rateLimitResult.headers;
 
   try {
     const rawBody = await request.json().catch(() => null);
@@ -158,7 +147,7 @@ export async function POST(request: Request) {
       console.error("Analytics error:", analyticsErr);
     }
 
-    return NextResponse.json({ reference, id: order.id });
+    return NextResponse.json({ reference, id: order.id }, { headers: rateLimitHeaders });
   } catch (err: any) {
     console.error("Order creation failed:", err);
     

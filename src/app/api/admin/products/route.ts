@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { z } from "zod";
-import { rateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
 
 const productSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(200),
@@ -21,13 +21,11 @@ const productSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  // Rate limiting
+  // Rate limiting - edge-compatible
   const identifier = getClientIdentifier(request);
-  const rateLimitResult = rateLimit(`admin:products:${identifier}`, RATE_LIMITS.api);
+  const rateLimitResult = checkRateLimit(`admin:products:${identifier}`, RATE_LIMITS.api);
   
-  if (!rateLimitResult.success) {
-    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
-  }
+  const rateLimitHeaders = rateLimitResult.headers;
 
   try {
     const supabase = await createSupabaseServerClient();
@@ -94,7 +92,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
     }
 
-    return NextResponse.json(data);
+    return NextResponse.json(data, { headers: rateLimitHeaders });
   } catch (error) {
     console.error("Error in POST /api/admin/products:", error);
     return NextResponse.json(

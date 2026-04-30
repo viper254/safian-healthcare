@@ -10,6 +10,7 @@ export const metadata: Metadata = {
     "Browse every product at Safian Healthcare — student kits, professional tools, facility items and patient supplies.",
 };
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
 type SP = { q?: string };

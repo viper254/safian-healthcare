@@ -1,15 +1,13 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
-import { rateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
+import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
-  // Rate limiting
+  // Rate limiting - edge-compatible
   const identifier = getClientIdentifier(request);
-  const rateLimitResult = rateLimit(`analytics:${identifier}`, RATE_LIMITS.analytics);
+  const rateLimitResult = checkRateLimit(`analytics:${identifier}`, RATE_LIMITS.analytics);
   
-  if (!rateLimitResult.success) {
-    return NextResponse.json({ success: false, error: "Rate limit exceeded" }, { status: 429 });
-  }
+  const rateLimitHeaders = rateLimitResult.headers;
 
   if (!supabaseIsConfigured()) {
     return NextResponse.json({ success: true, demo: true });
@@ -31,7 +29,7 @@ export async function POST(request: Request) {
 
     if (error) throw error;
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true }, { headers: rateLimitHeaders });
   } catch (error) {
     console.error("Analytics error:", error);
     return NextResponse.json({ error: "Failed to log analytics" }, { status: 500 });

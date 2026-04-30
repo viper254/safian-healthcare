@@ -6,6 +6,8 @@ import { Footer } from "@/components/layout/footer";
 import { MobileBottomBar } from "@/components/layout/mobile-bottom-bar";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
+import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Suspense } from "react";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
@@ -96,6 +98,7 @@ export const metadata: Metadata = {
     apple: "/logo.jpeg",
     shortcut: "/favicon.ico",
   },
+  manifest: "/manifest.json",
   verification: {
     google: "JdB8BuLtA5bibFfdPTiQJ0URBMY9_5_hyGa_KJcStsQ",
   },
@@ -106,12 +109,22 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <meta name="theme-color" content="#16a34a" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Safian Healthcare" />
+        <link rel="apple-touch-icon" href="/logo.jpeg" />
+      </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <Header />
         <main className="min-h-[60vh]">{children}</main>
         <Footer />
         <MobileBottomBar />
         <WhatsAppFab />
+        <InstallPrompt />
+        <ServiceWorkerRegister />
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>

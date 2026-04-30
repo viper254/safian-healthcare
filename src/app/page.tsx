@@ -7,6 +7,7 @@ import { WhyUs } from "@/components/landing/why-us";
 import { CallToAction } from "@/components/landing/cta";
 import { getCategories, getFeaturedProducts, getProducts } from "@/lib/data";
 
+export const dynamic = 'force-dynamic';
 export const revalidate = 60;
 
 export default async function HomePage() {

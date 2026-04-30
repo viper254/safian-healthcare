@@ -21,6 +21,15 @@ export async function createSupabaseServerClient() {
           }
         },
       },
+      global: {
+        fetch: (url, options = {}) => {
+          return fetch(url, {
+            ...options,
+            // Add timeout to prevent hanging
+            signal: AbortSignal.timeout(10000), // 10 second timeout
+          });
+        },
+      },
     },
   );
 }

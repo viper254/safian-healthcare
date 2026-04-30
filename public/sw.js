@@ -2,9 +2,8 @@
 const CACHE_NAME = 'safian-v1';
 const RUNTIME_CACHE = 'safian-runtime';
 
-// Assets to cache on install
+// Assets to cache on install (only local assets)
 const PRECACHE_ASSETS = [
-  '/',
   '/shop',
   '/about',
   '/contact',
@@ -15,7 +14,17 @@ const PRECACHE_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(PRECACHE_ASSETS))
+      .then((cache) => {
+        // Cache assets one by one to avoid failing if one fails
+        return Promise.allSettled(
+          PRECACHE_ASSETS.map(url => 
+            cache.add(url).catch(err => {
+              console.log(`Failed to cache ${url}:`, err);
+              return null;
+            })
+          )
+        );
+      })
       .then(() => self.skipWaiting())
   );
 });
@@ -38,7 +47,7 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip cross-origin requests
+  // Skip cross-origin requests (like Supabase images)
   if (url.origin !== location.origin) {
     return;
   }
@@ -53,11 +62,13 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Cache successful responses
-          if (response.ok) {
+          // Only cache successful responses
+          if (response && response.ok && response.status === 200) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseClone);
+              cache.put(request, responseClone).catch(() => {
+                // Silently fail cache writes
+              });
             });
           }
           return response;
@@ -73,8 +84,8 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Cache first strategy for assets (images, fonts, etc.)
-  if (request.destination === 'image' || request.destination === 'font' || request.destination === 'style') {
+  // Cache first strategy for static assets
+  if (request.destination === 'style' || request.destination === 'script' || request.destination === 'font') {
     event.respondWith(
       caches.match(request)
         .then((cachedResponse) => {
@@ -82,10 +93,10 @@ self.addEventListener('fetch', (event) => {
             return cachedResponse;
           }
           return fetch(request).then((response) => {
-            if (response.ok) {
+            if (response && response.ok && response.status === 200) {
               const responseClone = response.clone();
               caches.open(RUNTIME_CACHE).then((cache) => {
-                cache.put(request, responseClone);
+                cache.put(request, responseClone).catch(() => {});
               });
             }
             return response;
@@ -95,20 +106,31 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network first for everything else
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseClone);
-          });
-        }
-        return response;
-      })
-      .catch(() => caches.match(request))
-  );
+  // For images, try network first, don't cache external images
+  if (request.destination === 'image') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Only cache local images
+          if (response && response.ok && url.origin === location.origin) {
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(request, responseClone).catch(() => {});
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Try cache for local images only
+          if (url.origin === location.origin) {
+            return caches.match(request);
+          }
+          // For external images, just fail gracefully
+          return new Response('', { status: 404 });
+        })
+    );
+    return;
+  }
 });
 
 // Background sync for offline orders (future enhancement)

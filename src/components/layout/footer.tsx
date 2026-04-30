@@ -40,7 +40,7 @@ export function Footer() {
         <div>
           <h4 className="text-sm font-semibold mb-3 text-white">Contact</h4>
           <ul className="space-y-3 text-sm text-white/70">
-            <li className="flex gap-3"><Phone className="size-4 mt-0.5 text-yellow-300" /><span>{COMPANY_CONTACT.phone}</span></li>
+            <li className="flex gap-3"><Phone className="size-4 mt-0.5 text-yellow-300" /><span>{COMPANY_CONTACT.phoneFormatted}</span></li>
             <li className="flex gap-3"><Mail className="size-4 mt-0.5 text-yellow-300" /><span>{COMPANY_CONTACT.email}</span></li>
             <li className="flex gap-3"><MapPin className="size-4 mt-0.5 text-yellow-300" /><span>{COMPANY_CONTACT.address}</span></li>
           </ul>

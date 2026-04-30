@@ -35,9 +35,9 @@ export function CallToAction() {
               variant="outline"
               className="border-white/70 text-white hover:bg-white/10"
             >
-              <Link href={`tel:${COMPANY_CONTACT.phone.replace(/\s/g, "")}`}>
+              <Link href={`tel:${COMPANY_CONTACT.phone}`}>
                 <Phone className="size-4" />
-                {COMPANY_CONTACT.phone}
+                {COMPANY_CONTACT.phoneFormatted}
               </Link>
             </Button>
           </div>

@@ -69,8 +69,8 @@ export default function ContactPage() {
           <ContactCard
             icon={Phone}
             title="Call us"
-            value={COMPANY_CONTACT.phone}
-            href={`tel:${COMPANY_CONTACT.phone.replace(/\s/g, "")}`}
+            value={COMPANY_CONTACT.phoneFormatted}
+            href={`tel:${COMPANY_CONTACT.phone}`}
           />
           <ContactCard
             icon={MessageCircle}

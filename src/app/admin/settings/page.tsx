@@ -94,7 +94,7 @@ export default function AdminSettingsPage() {
               <Input 
                 id="store_phone" 
                 name="store_phone"
-                defaultValue={COMPANY_CONTACT.phone} 
+                defaultValue={COMPANY_CONTACT.phoneFormatted} 
                 type="tel"
                 autoComplete="tel"
               />

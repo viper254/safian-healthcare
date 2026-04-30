@@ -2,7 +2,7 @@
   "name": "Safian Healthcare & Medical Supplies",
   "short_name": "Safian Healthcare",
   "description": "Trusted supplier of medical student kits, professional diagnostic tools, facility equipment and patient supplies across Kenya",
-  "start_url": "/",
+  "start_url": "/shop",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#16a34a",

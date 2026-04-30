@@ -6,14 +6,14 @@ export function ServiceWorkerRegister() {
   useEffect(() => {
     if (
       typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      process.env.NODE_ENV === 'production'
+      'serviceWorker' in navigator
     ) {
-      // Register service worker
+      // Register service worker in both dev and prod for testing
+      // In production, you might want to add additional checks
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
-          console.log('✅ Service Worker registered:', registration.scope);
+          console.log('Service Worker registered:', registration.scope);
 
           // Check for updates
           registration.addEventListener('updatefound', () => {
@@ -22,14 +22,14 @@ export function ServiceWorkerRegister() {
               newWorker.addEventListener('statechange', () => {
                 if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
                   // New service worker available
-                  console.log('🔄 New version available! Refresh to update.');
+                  console.log('New version available! Refresh to update.');
                 }
               });
             }
           });
         })
         .catch((error) => {
-          console.error('❌ Service Worker registration failed:', error);
+          console.error('Service Worker registration failed:', error);
         });
 
       // Handle service worker updates

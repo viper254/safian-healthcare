@@ -11,7 +11,7 @@ type Props = {
 export function WhatsAppSupportButton({ orderReference }: Props) {
   function handleWhatsAppSupport() {
     const message = `Hi, I need help with my order ${orderReference}`;
-    const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   }
 

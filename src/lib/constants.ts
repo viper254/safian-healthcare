@@ -4,11 +4,11 @@ export const SITE_NAME = "SAFIAN HEALTHCARE & MEDICAL SUPPLIES";
 export const SITE_TAGLINE = "Trusted medical tools, kits & facility supplies";
 export const SITE_SHORT = "Safian";
 export const COMPANY_CONTACT = {
-  phone: "0756 597 813",
+  phone: "+254756597813",
   phoneFormatted: "+254 756 597 813",
   email: "info@safianhealthcare.com",
   whatsapp: "254756597813", // Format for WhatsApp API (no + or spaces)
-  whatsappDisplay: "0756 597 813",
+  whatsappDisplay: "+254 756 597 813",
   address: "Platinum Plaza, Nairobi CBD",
 };
 

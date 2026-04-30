@@ -55,7 +55,7 @@ export default function TrackOrderPage() {
     const message = reference 
       ? `Hi, I need help with my order ${reference}`
       : "Hi, I need help tracking my order";
-    const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, "_blank");
   }
 

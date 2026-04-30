@@ -14,14 +14,9 @@ export function InstallPrompt() {
   const [showPrompt, setShowPrompt] = useState(false);
 
   useEffect(() => {
-    // Only show in production or when explicitly testing
-    if (process.env.NODE_ENV !== 'production' && !window.location.search.includes('pwa-test')) {
-      return;
-    }
-
     // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
-      console.log('✅ PWA is already installed');
+      console.log('PWA is already installed');
       return;
     }
 
@@ -31,26 +26,25 @@ export function InstallPrompt() {
       const dismissedTime = parseInt(dismissed);
       const daysSinceDismissed = (Date.now() - dismissedTime) / (1000 * 60 * 60 * 24);
       if (daysSinceDismissed < 7) {
-        return; // Don't show again for 7 days
+        return;
       }
     }
 
-    const handler = (e: Event) => {
+    const handleBeforeInstall = (e: Event) => {
       e.preventDefault();
-      console.log('📱 Install prompt available');
+      console.log('Install prompt available');
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       
-      // Show prompt after 10 seconds in dev, 30 seconds in prod
-      const delay = process.env.NODE_ENV === 'production' ? 30000 : 10000;
+      const delay = process.env.NODE_ENV === 'production' ? 30000 : 5000;
       setTimeout(() => {
         setShowPrompt(true);
       }, delay);
     };
 
-    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('beforeinstallprompt', handleBeforeInstall);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstall);
     };
   }, []);
 

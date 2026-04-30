@@ -140,13 +140,6 @@ export default function CheckoutPage() {
         .map((l) => `* ${l.name}\n  (${formatKES(l.unit_price)} x ${l.quantity})`)
         .join("\n\n");
       
-      // Get the first product image for preview if available
-      // We use a clean redirect URL to mask the technical Supabase storage link
-      const siteUrl = window.location.origin;
-      const firstItemImage = lines[0]?.image 
-        ? `\n\nProduct Image: ${siteUrl}/api/media?url=${encodeURIComponent(lines[0].image)}` 
-        : "";
-      
       const message = `*NEW ORDER: ${orderReference}*
 
 *Customer Details:*
@@ -160,11 +153,11 @@ ${itemsList}
 *Summary:*
 Subtotal: ${formatKES(sub)}
 Delivery: ${delivery === 0 ? "FREE" : formatKES(delivery)}
-*Total: ${formatKES(total)}*${firstItemImage}
+*Total: ${formatKES(total)}*
 
 Please confirm availability and delivery. Thank you!`;
       
-      const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.phone.replace(/\D/g, "")}?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
       
       // Clear cart
       clear();

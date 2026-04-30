@@ -15,17 +15,17 @@ export default async function AdminProductsPage() {
         title="Products"
         subtitle={`${products.length} products in the catalogue`}
       />
-      <div className="p-4 sm:p-6 space-y-5">
-        <div className="flex flex-wrap items-center gap-3">
-          <div className="relative flex-1 min-w-[240px] max-w-md">
+      <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap items-stretch sm:items-center gap-3">
+          <div className="relative flex-1 min-w-full sm:min-w-[240px] sm:max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <input
               type="text"
-              placeholder="Search by name, SKU or brand…"
+              placeholder="Search products..."
               className="h-10 w-full rounded-full border border-input bg-background pl-9 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
-          <Button variant="gradient" className="ml-auto" asChild>
+          <Button variant="gradient" className="sm:ml-auto" asChild>
             <Link href="/admin/products/new">
               <Plus className="size-4" /> New product
             </Link>

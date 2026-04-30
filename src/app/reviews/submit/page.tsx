@@ -2,7 +2,15 @@ import { ReviewSubmitForm } from "@/components/reviews/review-submit-form";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function SubmitReviewPage() {
+export default async function SubmitReviewPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ product?: string; name?: string }>;
+}) {
+  const params = await searchParams;
+  const productId = params.product;
+  const productName = params.name;
+
   return (
     <div className="container py-12 max-w-2xl">
       <Link
@@ -15,14 +23,16 @@ export default function SubmitReviewPage() {
       
       <div className="mb-8">
         <h1 className="font-display text-3xl font-bold mb-2">
-          Share Your Experience
+          {productName ? `Review: ${productName}` : "Share Your Experience"}
         </h1>
         <p className="text-muted-foreground">
-          Your feedback helps us serve you better and helps other customers make informed decisions.
+          {productName 
+            ? "Tell us about your experience with this product"
+            : "Your feedback helps us serve you better and helps other customers make informed decisions."}
         </p>
       </div>
 
-      <ReviewSubmitForm />
+      <ReviewSubmitForm productId={productId} productName={productName} />
     </div>
   );
 }

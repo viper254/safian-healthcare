@@ -94,6 +94,7 @@ export function Header() {
         .select("id, customer_name, rating, review_text")
         .eq("is_approved", true)
         .eq("is_featured", true)
+        .is("product_id", null) // Only general business reviews for ticker
         .order("created_at", { ascending: false })
         .limit(10)
         .then(({ data }) => {
@@ -105,6 +106,29 @@ export function Header() {
   }, []);
 
   useEffect(() => setOpen(false), [pathname]);
+
+  // Prevent body scroll when drawer is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  // Close drawer on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [open]);
 
   // Hide header chrome on admin pages — admin has its own shell
   if (pathname?.startsWith("/admin")) return null;
@@ -258,86 +282,95 @@ export function Header() {
       </div>
 
       {/* Mobile drawer */}
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
-            onClick={() => setOpen(false)}
-          />
-          <div className="absolute left-0 top-0 h-full w-[86%] max-w-sm bg-background shadow-2xl p-5 flex flex-col gap-5 animate-fade-up">
-            <div className="flex items-center justify-between">
-              <Logo />
-              <button
-                aria-label="Close menu"
-                className="inline-flex size-10 items-center justify-center rounded-full hover:bg-accent"
-                onClick={() => setOpen(false)}
+      <div
+        className={cn(
+          "fixed inset-0 z-50 lg:hidden transition-opacity duration-300",
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+      >
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+        <div
+          className={cn(
+            "absolute left-0 top-0 bottom-0 w-[86%] max-w-sm bg-background shadow-2xl p-5 flex flex-col gap-5 transition-transform duration-300 ease-out overflow-y-auto",
+            open ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          <div className="flex items-center justify-between shrink-0">
+            <Logo />
+            <button
+              aria-label="Close menu"
+              className="inline-flex size-10 items-center justify-center rounded-full hover:bg-accent transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+          <form action="/shop" method="get" className="flex gap-2 shrink-0">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input name="q" placeholder="Search products…" className="pl-9" />
+            </div>
+          </form>
+          <nav className="flex flex-col gap-1">
+            {primaryNav.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="px-3 py-3 text-base font-medium rounded-lg hover:bg-accent transition-colors"
               >
-                <X className="size-5" />
-              </button>
-            </div>
-            <form action="/shop" method="get" className="flex gap-2">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input name="q" placeholder="Search products…" className="pl-9" />
-              </div>
-            </form>
-            <nav className="flex flex-col gap-1">
-              {primaryNav.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="px-3 py-3 text-base font-medium rounded-lg hover:bg-accent"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-            <div className="text-xs uppercase tracking-wide text-muted-foreground px-3 pt-1">
-              Categories
-            </div>
-            <nav className="flex flex-col gap-1">
-              {CATEGORY_ORDER.map((slug) => (
-                <Link
-                  key={slug}
-                  href={`/shop/${slug}`}
-                  className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent text-foreground/80"
-                >
-                  {CATEGORY_META[slug].name}
-                </Link>
-              ))}
-            </nav>
-            <div className="mt-auto grid gap-2">
-              {user ? (
-                <>
-                  <Button asChild variant="gradient">
-                    <Link href="/account">
-                      <User className="size-4" />
-                      My Account
-                    </Link>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          <div className="text-xs uppercase tracking-wide text-muted-foreground px-3 pt-1">
+            Categories
+          </div>
+          <nav className="flex flex-col gap-1 flex-1">
+            {CATEGORY_ORDER.map((slug) => (
+              <Link
+                key={slug}
+                href={`/shop/${slug}`}
+                className="px-3 py-2.5 text-sm rounded-lg hover:bg-accent text-foreground/80 transition-colors"
+              >
+                {CATEGORY_META[slug].name}
+              </Link>
+            ))}
+          </nav>
+          <div className="mt-auto grid gap-2 shrink-0 pb-2">
+            {user ? (
+              <>
+                <Button asChild variant="gradient">
+                  <Link href="/account">
+                    <User className="size-4" />
+                    My Account
+                  </Link>
+                </Button>
+                <form action="/api/auth/signout" method="post">
+                  <Button type="submit" variant="outline" className="w-full">
+                    Sign out
                   </Button>
-                  <form action="/api/auth/signout" method="post">
-                    <Button type="submit" variant="outline" className="w-full">
-                      Sign out
-                    </Button>
-                  </form>
-                </>
-              ) : (
-                <>
-                  <Button asChild variant="gradient">
-                    <Link href="/login">
-                      <LogIn className="size-4" />
-                      Sign in
-                    </Link>
-                  </Button>
-                  <Button asChild variant="outline">
-                    <Link href="/register">Create account</Link>
-                  </Button>
-                </>
-              )}
-            </div>
+                </form>
+              </>
+            ) : (
+              <>
+                <Button asChild variant="gradient">
+                  <Link href="/login">
+                    <LogIn className="size-4" />
+                    Sign in
+                  </Link>
+                </Button>
+                <Button asChild variant="outline">
+                  <Link href="/register">Create account</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
-      )}
+      </div>
     </header>
   );
 }

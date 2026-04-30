@@ -60,20 +60,31 @@ export function AdminTopbar({
       document.body.style.overflow = "";
     };
   }, [open]);
+
+  // Close drawer on Escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && open) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("keydown", handleEscape);
+    return () => document.removeEventListener("keydown", handleEscape);
+  }, [open]);
   
   return (
     <header className="sticky top-0 z-30 border-b bg-background/90 backdrop-blur">
-      <div className="h-16 px-4 sm:px-6 flex items-center gap-4">
+      <div className="h-16 px-4 sm:px-6 flex items-center gap-3 sm:gap-4">
         <button
-          className="inline-flex size-9 items-center justify-center rounded-full hover:bg-accent lg:hidden"
+          className="inline-flex size-10 items-center justify-center rounded-lg hover:bg-accent transition-colors lg:hidden active:scale-95"
           onClick={() => setOpen(true)}
           aria-label="Open admin menu"
         >
           <Menu className="size-5" />
         </button>
         <div className="flex-1 min-w-0">
-          <h1 className="font-display font-bold text-lg sm:text-xl truncate">{title}</h1>
-          {subtitle && <p className="text-xs text-muted-foreground">{subtitle}</p>}
+          <h1 className="font-display font-bold text-base sm:text-lg md:text-xl truncate">{title}</h1>
+          {subtitle && <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{subtitle}</p>}
         </div>
         <div className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
@@ -91,73 +102,82 @@ export function AdminTopbar({
       </div>
 
       {/* Mobile drawer */}
-      {open && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-            onClick={() => setOpen(false)}
-          />
-          {/* Drawer panel */}
-          <nav className="absolute left-0 top-0 bottom-0 w-72 max-w-[85vw] bg-card shadow-2xl flex flex-col animate-in slide-in-from-left duration-200">
-            {/* Header */}
-            <div className="h-16 flex items-center justify-between px-5 border-b shrink-0">
-              <Logo />
-              <button
-                aria-label="Close menu"
-                className="inline-flex size-9 items-center justify-center rounded-full hover:bg-accent"
-                onClick={() => setOpen(false)}
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-            {/* Nav items */}
-            <div className="flex-1 overflow-y-auto p-3 space-y-1">
-              {mobileItems.map((item) => {
-                const active = item.exact
-                  ? pathname === item.href
-                  : pathname?.startsWith(item.href);
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      active
-                        ? "bg-brand-gradient text-white shadow-sm"
-                        : "text-foreground/70 hover:bg-accent hover:text-accent-foreground",
-                    )}
-                  >
-                    <item.icon className="size-4" />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-            {/* Footer */}
-            <div className="p-3 border-t space-y-1 shrink-0">
-              <Link
-                href="/"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
-              >
-                <ArrowUpRight className="size-3.5" />
-                View storefront
-              </Link>
-              <form action="/api/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-destructive transition-colors"
+      <div
+        className={cn(
+          "fixed inset-0 z-50 lg:hidden transition-opacity duration-300",
+          open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        )}
+      >
+        {/* Backdrop */}
+        <div
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
+          onClick={() => setOpen(false)}
+          aria-hidden="true"
+        />
+        {/* Drawer panel */}
+        <nav
+          className={cn(
+            "absolute left-0 top-0 bottom-0 w-64 sm:w-72 bg-card shadow-2xl flex flex-col transition-transform duration-300 ease-out",
+            open ? "translate-x-0" : "-translate-x-full"
+          )}
+        >
+          {/* Header */}
+          <div className="h-16 flex items-center justify-between px-4 sm:px-5 border-b shrink-0">
+            <Logo />
+            <button
+              aria-label="Close menu"
+              className="inline-flex size-9 items-center justify-center rounded-full hover:bg-accent transition-colors"
+              onClick={() => setOpen(false)}
+            >
+              <X className="size-5" />
+            </button>
+          </div>
+          {/* Nav items */}
+          <div className="flex-1 overflow-y-auto p-3 space-y-1">
+            {mobileItems.map((item) => {
+              const active = item.exact
+                ? pathname === item.href
+                : pathname?.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                    active
+                      ? "bg-brand-gradient text-white shadow-sm"
+                      : "text-foreground/70 hover:bg-accent hover:text-accent-foreground",
+                  )}
                 >
-                  <LogOut className="size-3.5" />
-                  Sign out
-                </button>
-              </form>
-            </div>
-          </nav>
-        </div>
-      )}
+                  <item.icon className="size-4" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
+          {/* Footer */}
+          <div className="p-3 border-t space-y-1 shrink-0">
+            <Link
+              href="/"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ArrowUpRight className="size-3.5" />
+              View storefront
+            </Link>
+            <form action="/api/auth/signout" method="post">
+              <button
+                type="submit"
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-destructive transition-colors"
+              >
+                <LogOut className="size-3.5" />
+                Sign out
+              </button>
+            </form>
+          </div>
+        </nav>
+      </div>
     </header>
   );
 }

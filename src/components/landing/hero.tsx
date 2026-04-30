@@ -129,17 +129,35 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
     fetchSettings();
   }, []);
 
-  // Override each slide's image with the matching DB category's image_url so admin edits show.
+  // Filter slides to only include categories that exist in the database
   const effectiveSlides = useMemo<Slide[]>(() => {
     if (categories.length === 0) return slides;
+    
+    const activeCategorySlugs = new Set(categories.map((c) => c.slug));
     const bySlug = new Map(categories.map((c) => [c.slug, c]));
-    return slides.map((slide) => {
-      const cat = bySlug.get(slide.slug);
-      return cat?.image_url ? { ...slide, image: cat.image_url } : slide;
+    
+    // Only include slides for categories that exist in the database
+    return slides
+      .filter((slide) => activeCategorySlugs.has(slide.slug))
+      .map((slide) => {
+        const cat = bySlug.get(slide.slug);
+        return cat?.image_url ? { ...slide, image: cat.image_url } : slide;
+      });
+  }, [categories]);
+
+  // Filter category chips to only include active categories
+  const activeChips = useMemo(() => {
+    if (categories.length === 0) return categoryChips;
+    const activeCategorySlugs = new Set(categories.map((c) => c.slug));
+    return categoryChips.filter((chip) => {
+      // Extract slug from href (e.g., "/shop/diagnostic-essentials" -> "diagnostic-essentials")
+      const slug = chip.href.split('/').pop();
+      return slug && activeCategorySlugs.has(slug as CategorySlug);
     });
   }, [categories]);
 
   useEffect(() => {
+    if (effectiveSlides.length === 0) return;
     const t = setInterval(
       () => setIdx((i) => (i + 1) % effectiveSlides.length),
       5000,
@@ -148,6 +166,11 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
   }, [effectiveSlides.length]);
 
   const s = effectiveSlides[idx] ?? effectiveSlides[0];
+  
+  // If no slides available, don't render the hero
+  if (effectiveSlides.length === 0) {
+    return null;
+  }
 
   return (
     <section className="relative overflow-hidden bg-background">
@@ -216,7 +239,7 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
 
           {/* Category quick chips */}
           <div className="mt-8 flex flex-wrap gap-2">
-            {categoryChips.map(({ icon: Icon, label, href }) => (
+            {activeChips.map(({ icon: Icon, label, href }) => (
               <Link
                 key={label}
                 href={href}

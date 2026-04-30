@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Star, Check, X, MessageSquare, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
 
 interface Review {
   id: string;
@@ -16,6 +18,12 @@ interface Review {
   is_featured: boolean;
   admin_response: string | null;
   created_at: string;
+  product_id: string | null;
+  products?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
 }
 
 export function ReviewManagementCard({ review }: { review: Review }) {
@@ -85,8 +93,31 @@ export function ReviewManagementCard({ review }: { review: Review }) {
   return (
     <div className={`rounded-lg border p-4 ${review.is_featured ? "border-yellow-400 bg-yellow-50/50" : "bg-card"}`}>
       <div className="flex items-start justify-between mb-2">
-        <div>
-          <p className="font-semibold">{review.customer_name}</p>
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="font-semibold">{review.customer_name}</p>
+            {review.products ? (
+              <Badge variant="secondary" className="text-xs">
+                Product Review
+              </Badge>
+            ) : (
+              <Badge variant="outline" className="text-xs">
+                Business Review
+              </Badge>
+            )}
+          </div>
+          {review.products && (
+            <Link 
+              href={`/product/${review.products.slug}`}
+              target="_blank"
+              className="text-xs text-primary hover:underline flex items-center gap-1"
+            >
+              {review.products.name}
+              <svg className="size-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+            </Link>
+          )}
           <div className="flex gap-0.5 mt-1">
             {Array.from({ length: 5 }).map((_, i) => (
               <Star
@@ -161,7 +192,8 @@ export function ReviewManagementCard({ review }: { review: Review }) {
               size="sm"
               variant={review.is_featured ? "default" : "outline"}
               onClick={handleFeature}
-              disabled={loading}
+              disabled={loading || !!review.product_id}
+              title={review.product_id ? "Only business reviews can be featured in ticker" : "Feature in reviews ticker"}
             >
               <Sparkles className="size-3 mr-1" />
               {review.is_featured ? "Featured" : "Feature"}

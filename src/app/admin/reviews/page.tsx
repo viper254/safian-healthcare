@@ -10,7 +10,14 @@ export default async function AdminReviewsPage() {
   
   const { data: reviews } = await supabase
     .from("reviews")
-    .select("*")
+    .select(`
+      *,
+      products (
+        id,
+        name,
+        slug
+      )
+    `)
     .order("created_at", { ascending: false });
 
   const pending = reviews?.filter(r => !r.is_approved) || [];

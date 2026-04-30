@@ -25,9 +25,9 @@ export function RevenueAreaChart({
   data: { label: string; revenue: number; orders: number }[];
 }) {
   return (
-    <div className="h-72">
+    <div className="h-64 sm:h-72 -mx-2 sm:mx-0">
       <ResponsiveContainer width="100%" height="100%">
-        <AreaChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+        <AreaChart data={data} margin={{ top: 10, right: 8, left: -20, bottom: 0 }}>
           <defs>
             <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor="#F68B1F" stopOpacity={0.5} />
@@ -39,9 +39,9 @@ export function RevenueAreaChart({
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} stroke="#e5e7eb" strokeDasharray="3 3" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={70}
-            tickFormatter={(v) => `KES ${(v / 1000).toFixed(0)}K`} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={60}
+            tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
           <Tooltip
             formatter={(value, name) => {
               const n = Number(value);
@@ -53,7 +53,7 @@ export function RevenueAreaChart({
             contentStyle={{
               borderRadius: 12,
               border: "1px solid #e5e7eb",
-              fontSize: 12,
+              fontSize: 11,
             }}
           />
           <Area
@@ -82,13 +82,13 @@ export function CategoryPieChart({
   data: { name: string; value: number }[];
 }) {
   return (
-    <div className="h-72">
+    <div className="h-64 sm:h-72">
       <ResponsiveContainer width="100%" height="100%">
         <PieChart>
           <Pie
             data={data}
-            innerRadius={60}
-            outerRadius={90}
+            innerRadius={50}
+            outerRadius={80}
             paddingAngle={3}
             dataKey="value"
             nameKey="name"
@@ -99,9 +99,9 @@ export function CategoryPieChart({
           </Pie>
           <Tooltip
             formatter={(v) => [`${Number(v)}%`, "Share"]}
-            contentStyle={{ borderRadius: 12, fontSize: 12 }}
+            contentStyle={{ borderRadius: 12, fontSize: 11 }}
           />
-          <Legend wrapperStyle={{ fontSize: 12 }} />
+          <Legend wrapperStyle={{ fontSize: 11 }} />
         </PieChart>
       </ResponsiveContainer>
     </div>
@@ -114,15 +114,15 @@ export function VisitsBarChart({
   data: { label: string; visits: number }[];
 }) {
   return (
-    <div className="h-72">
+    <div className="h-64 sm:h-72 -mx-2 sm:mx-0">
       <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
+        <BarChart data={data} margin={{ top: 10, right: 8, left: -20, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="#e5e7eb" strokeDasharray="3 3" />
-          <XAxis dataKey="label" tick={{ fontSize: 11 }} tickLine={false} axisLine={false} />
-          <YAxis tick={{ fontSize: 11 }} tickLine={false} axisLine={false} width={40} />
+          <XAxis dataKey="label" tick={{ fontSize: 10 }} tickLine={false} axisLine={false} />
+          <YAxis tick={{ fontSize: 10 }} tickLine={false} axisLine={false} width={35} />
           <Tooltip
             formatter={(v) => [`${Number(v)} visits`, "Traffic"]}
-            contentStyle={{ borderRadius: 12, fontSize: 12 }}
+            contentStyle={{ borderRadius: 12, fontSize: 11 }}
           />
           <Bar dataKey="visits" fill="#F68B1F" radius={[6, 6, 0, 0]} maxBarSize={22} />
         </BarChart>

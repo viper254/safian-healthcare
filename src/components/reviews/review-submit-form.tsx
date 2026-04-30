@@ -9,7 +9,12 @@ import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
-export function ReviewSubmitForm() {
+interface ReviewSubmitFormProps {
+  productId?: string;
+  productName?: string;
+}
+
+export function ReviewSubmitForm({ productId, productName }: ReviewSubmitFormProps = {}) {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -61,7 +66,7 @@ export function ReviewSubmitForm() {
     try {
       const supabase = createSupabaseBrowserClient();
       
-      // We remove user_id from the insert because it's not in the current schema
+      // Insert review with optional product_id
       const { error: submitError } = await supabase
         .from("reviews")
         .insert({
@@ -69,6 +74,7 @@ export function ReviewSubmitForm() {
           customer_email: email || null,
           rating,
           review_text: reviewText,
+          product_id: productId || null, // Link to product if provided
           is_approved: false, // Requires admin approval
         });
 
@@ -128,6 +134,14 @@ export function ReviewSubmitForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {productName && (
+        <div className="rounded-lg border-2 border-primary/20 bg-primary/5 p-4">
+          <p className="text-sm font-medium">
+            You're reviewing: <span className="font-bold">{productName}</span>
+          </p>
+        </div>
+      )}
+      
       <div className="rounded-lg border bg-card p-6">
         <Label className="text-base font-semibold mb-3 block">
           Your Rating <span className="text-destructive">*</span>

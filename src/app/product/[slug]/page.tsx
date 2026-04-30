@@ -89,6 +89,16 @@ export default async function ProductPage(context: {
   const { slug } = await context.params;
   const product = await getProductBySlug(slug);
   if (!product) return notFound();
+  
+  // Fetch product-specific reviews
+  const supabase = await (await import("@/lib/supabase/server")).createSupabaseServerClient();
+  const { data: reviews } = await supabase
+    .from("reviews")
+    .select("*")
+    .eq("product_id", product.id)
+    .eq("is_approved", true)
+    .order("created_at", { ascending: false });
+  
   const { price, type } = effectivePrice(product);
   const savings =
     type === "offer" && product.offer_price
@@ -219,6 +229,81 @@ export default async function ProductPage(context: {
           </ul>
         </div>
       </div>
+
+      {/* Reviews Section */}
+      <section className="mt-16">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="font-display font-bold text-2xl sm:text-3xl">Customer Reviews</h2>
+          <Link href={`/reviews/submit?product=${product.id}&name=${encodeURIComponent(product.name)}`}>
+            <button className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-gradient text-white font-semibold text-sm hover:shadow-lg transition-shadow">
+              <Star className="size-4" />
+              Write a Review
+            </button>
+          </Link>
+        </div>
+
+        {reviews && reviews.length > 0 ? (
+          <div className="space-y-6">
+            {reviews.map((review: any) => (
+              <div key={review.id} className="rounded-xl border bg-card p-5 sm:p-6">
+                <div className="flex items-start justify-between gap-4 mb-3">
+                  <div>
+                    <p className="font-semibold text-base">{review.customer_name}</p>
+                    <div className="flex gap-0.5 mt-1">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`size-4 ${
+                            i < review.rating
+                              ? "fill-brand-orange-500 text-brand-orange-500"
+                              : "text-muted-foreground/30"
+                          }`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                  <time className="text-xs text-muted-foreground whitespace-nowrap">
+                    {new Date(review.created_at).toLocaleDateString("en-US", {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </time>
+                </div>
+
+                <p className="text-sm sm:text-base text-foreground/90 leading-relaxed">
+                  {review.review_text}
+                </p>
+
+                {review.admin_response && (
+                  <div className="mt-4 ml-4 sm:ml-8 pl-4 border-l-2 border-brand-orange-500/30 bg-muted/30 rounded-r-lg p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <ShieldCheck className="size-4 text-brand-orange-600" />
+                      <p className="font-semibold text-sm text-brand-orange-600">
+                        Response from Safian Healthcare
+                      </p>
+                    </div>
+                    <p className="text-sm text-foreground/80">
+                      {review.admin_response}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12 rounded-xl border bg-card">
+            <Star className="size-12 mx-auto text-muted-foreground/30 mb-3" />
+            <p className="text-muted-foreground mb-4">No reviews yet. Be the first to review this product!</p>
+            <Link href={`/reviews/submit?product=${product.id}&name=${encodeURIComponent(product.name)}`}>
+              <button className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-brand-gradient text-white font-semibold hover:shadow-lg transition-shadow">
+                <Star className="size-4" />
+                Write the First Review
+              </button>
+            </Link>
+          </div>
+        )}
+      </section>
 
       {related.length > 0 && (
         <section className="mt-20">

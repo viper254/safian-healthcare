@@ -74,8 +74,17 @@ export const useCart = create<CartState>()(
     {
       name: "safian-cart",
       storage: createJSONStorage(() => localStorage),
-      // Add version for future migrations
       version: 1,
+      migrate: (persistedState: any, version: number) => {
+        // If no version or old version, return fresh state
+        if (version === 0 || !persistedState) {
+          return {
+            lines: [],
+          };
+        }
+        // Return persisted state as-is for current version
+        return persistedState as CartState;
+      },
     },
   ),
 );

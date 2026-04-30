@@ -333,7 +333,7 @@ Please confirm availability and delivery. Thank you!`;
               </div>
               {sub >= FREE_DELIVERY_OVER_KES && (
                 <p className="text-xs text-brand-green-600 font-medium">
-                  🎉 You qualify for free delivery!
+                  You qualify for free delivery!
                 </p>
               )}
               {sub < FREE_DELIVERY_OVER_KES && delivery > 0 && (

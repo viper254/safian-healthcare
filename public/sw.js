@@ -57,62 +57,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Network first strategy for HTML pages
+  // For navigation requests (page loads)
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Only cache successful responses
-          if (response && response.ok && response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(RUNTIME_CACHE).then((cache) => {
-              cache.put(request, responseClone).catch(() => {
-                // Silently fail cache writes
-              });
-            });
-          }
-          return response;
-        })
-        .catch(() => {
-          // Fallback to cache, then offline page
-          return caches.match(request)
-            .then((cachedResponse) => {
-              return cachedResponse || caches.match('/offline');
-            });
-        })
-    );
-    return;
-  }
-
-  // Cache first strategy for static assets
-  if (request.destination === 'style' || request.destination === 'script' || request.destination === 'font') {
-    event.respondWith(
-      caches.match(request)
-        .then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          return fetch(request).then((response) => {
-            if (response && response.ok && response.status === 200) {
-              const responseClone = response.clone();
-              caches.open(RUNTIME_CACHE).then((cache) => {
-                cache.put(request, responseClone).catch(() => {});
-              });
-            }
-            return response;
-          });
-        })
-    );
-    return;
-  }
-
-  // For images, try network first, don't cache external images
-  if (request.destination === 'image') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          // Only cache local images
-          if (response && response.ok && url.origin === location.origin) {
+          if (response && response.ok) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
               cache.put(request, responseClone).catch(() => {});
@@ -121,16 +71,15 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Try cache for local images only
-          if (url.origin === location.origin) {
-            return caches.match(request);
-          }
-          // For external images, just fail gracefully
-          return new Response('', { status: 404 });
+          return caches.match(request)
+            .then((cachedResponse) => cachedResponse || caches.match('/offline'));
         })
     );
     return;
   }
+
+  // For all other requests, just let them through normally
+  // Don't intercept images, styles, scripts - let browser handle them
 });
 
 // Background sync for offline orders (future enhancement)

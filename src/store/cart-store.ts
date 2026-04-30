@@ -12,6 +12,8 @@ type CartState = {
   clear: () => void;
   totalQty: () => number;
   subtotal: () => number;
+  validateStock: (productId: string, availableStock: number) => boolean;
+  updateLineStock: (productId: string, newStock: number) => void;
 };
 
 export const useCart = create<CartState>()(
@@ -22,13 +24,12 @@ export const useCart = create<CartState>()(
         set((state) => {
           const existing = state.lines.find((l) => l.product_id === line.product_id);
           if (existing) {
+            // Don't exceed available stock
+            const newQty = Math.min(existing.quantity + line.quantity, line.stock || 99);
             return {
               lines: state.lines.map((l) =>
                 l.product_id === line.product_id
-                  ? {
-                      ...l,
-                      quantity: Math.min(l.quantity + line.quantity, line.stock || 99),
-                    }
+                  ? { ...l, quantity: newQty }
                   : l,
               ),
             };
@@ -51,10 +52,30 @@ export const useCart = create<CartState>()(
       totalQty: () => get().lines.reduce((s, l) => s + l.quantity, 0),
       subtotal: () =>
         get().lines.reduce((s, l) => s + l.unit_price * l.quantity, 0),
+      validateStock: (productId, availableStock) => {
+        const line = get().lines.find((l) => l.product_id === productId);
+        if (!line) return true;
+        return line.quantity <= availableStock;
+      },
+      updateLineStock: (productId, newStock) =>
+        set((state) => ({
+          lines: state.lines.map((l) =>
+            l.product_id === productId
+              ? { 
+                  ...l, 
+                  stock: newStock,
+                  // Adjust quantity if it exceeds new stock
+                  quantity: Math.min(l.quantity, newStock)
+                }
+              : l,
+          ).filter(l => l.stock > 0), // Remove items that are now out of stock
+        })),
     }),
     {
       name: "safian-cart",
       storage: createJSONStorage(() => localStorage),
+      // Add version for future migrations
+      version: 1,
     },
   ),
 );

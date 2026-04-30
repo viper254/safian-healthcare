@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,32 @@ export function ReviewSubmitForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+
+  // Auto-fill customer details if logged in
+  useEffect(() => {
+    async function loadUserProfile() {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("id", user.id)
+          .single();
+        
+        if (profile) {
+          if (profile.full_name) setCustomerName(profile.full_name);
+          if (profile.email) setCustomerEmail(profile.email);
+        } else if (user.email) {
+          setCustomerEmail(user.email);
+        }
+      }
+    }
+    loadUserProfile();
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -22,11 +48,11 @@ export function ReviewSubmitForm() {
     setError("");
 
     const formData = new FormData(e.currentTarget);
-    const customerName = formData.get("customer_name") as string;
-    const customerEmail = formData.get("customer_email") as string;
+    const name = formData.get("customer_name") as string;
+    const email = formData.get("customer_email") as string;
     const reviewText = formData.get("review_text") as string;
 
-    if (!customerName || !reviewText || rating === 0) {
+    if (!name || !reviewText || rating === 0) {
       setError("Please fill in all required fields and select a rating");
       setLoading(false);
       return;
@@ -35,11 +61,12 @@ export function ReviewSubmitForm() {
     try {
       const supabase = createSupabaseBrowserClient();
       
+      // We remove user_id from the insert because it's not in the current schema
       const { error: submitError } = await supabase
         .from("reviews")
         .insert({
-          customer_name: customerName,
-          customer_email: customerEmail || null,
+          customer_name: name,
+          customer_email: email || null,
           rating,
           review_text: reviewText,
           is_approved: false, // Requires admin approval
@@ -51,7 +78,10 @@ export function ReviewSubmitForm() {
       // Reset form
       (e.target as HTMLFormElement).reset();
       setRating(0);
+      setCustomerName("");
+      setCustomerEmail("");
     } catch (err: any) {
+      console.error("Review submission error:", err);
       setError(err.message || "Failed to submit review");
     } finally {
       setLoading(false);
@@ -60,20 +90,38 @@ export function ReviewSubmitForm() {
 
   if (success) {
     return (
-      <div className="rounded-lg border bg-green-50 dark:bg-green-950/20 p-8 text-center">
-        <div className="size-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center mx-auto mb-4">
-          <Star className="size-6 text-green-600 dark:text-green-400 fill-current" />
+      <div className="rounded-2xl border-2 border-brand-green-500/30 bg-gradient-to-br from-brand-green-50 to-white dark:from-brand-green-950/20 dark:to-background p-8 text-center shadow-lg">
+        <div className="size-16 rounded-full bg-brand-green-500 flex items-center justify-center mx-auto mb-4 animate-bounce">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
         </div>
-        <h3 className="font-semibold text-lg mb-2">Thank You!</h3>
-        <p className="text-muted-foreground mb-4">
-          Your review has been submitted and is pending approval. We appreciate your feedback!
+        <h3 className="font-display font-bold text-2xl mb-3 text-brand-green-700 dark:text-brand-green-400">
+          Thank You for Your Feedback!
+        </h3>
+        <p className="text-muted-foreground mb-2 text-base">
+          Your review has been submitted successfully and is awaiting approval from our team.
         </p>
-        <Button
-          onClick={() => setSuccess(false)}
-          variant="outline"
-        >
-          Submit Another Review
-        </Button>
+        <p className="text-sm text-muted-foreground mb-6">
+          We truly appreciate you taking the time to share your experience with us. Your feedback helps us improve our services and assists other customers in making informed decisions.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            onClick={() => setSuccess(false)}
+            variant="gradient"
+            size="lg"
+          >
+            Submit Another Review
+          </Button>
+          <Button
+            asChild
+            variant="outline"
+            size="lg"
+          >
+            <a href="/">Back to Home</a>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -124,7 +172,10 @@ export function ReviewSubmitForm() {
             id="customer_name"
             name="customer_name"
             placeholder="John Doe"
+            value={customerName}
+            onChange={(e) => setCustomerName(e.target.value)}
             required
+            autoComplete="name"
             className="mt-1.5"
           />
         </div>
@@ -138,6 +189,9 @@ export function ReviewSubmitForm() {
             name="customer_email"
             type="email"
             placeholder="john@example.com"
+            value={customerEmail}
+            onChange={(e) => setCustomerEmail(e.target.value)}
+            autoComplete="email"
             className="mt-1.5"
           />
           <p className="text-xs text-muted-foreground mt-1">

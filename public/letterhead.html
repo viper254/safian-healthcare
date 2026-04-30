@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Safian Healthcare & Medical Supplies - Letterhead</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .page {
+            width: 210mm;
+            height: 297mm;
+            margin: 0 auto;
+            background: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #6B9F3E 0%, #F68B1F 50%, #2B5C9E 100%);
+            padding: 30px 40px;
+            color: white;
+        }
+        
+        .header-top {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            font-weight: 700;
+            color: #F68B1F;
+            flex-shrink: 0;
+        }
+        
+        .company-info h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .company-info p {
+            font-size: 12px;
+            opacity: 0.95;
+        }
+        
+        .contact-info {
+            display: flex;
+            gap: 25px;
+            font-size: 11px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+        
+        .contact-info span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        /* Content Area */
+        .content {
+            flex: 1;
+            padding: 40px;
+            font-size: 14px;
+            line-height: 1.8;
+            color: #333;
+        }
+        
+        /* Footer */
+        .footer {
+            background: linear-gradient(135deg, #6B9F3E 0%, #F68B1F 50%, #2B5C9E 100%);
+            padding: 15px 40px;
+            color: white;
+            font-size: 10px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .footer-divider {
+            border: none;
+            border-top: 1px solid rgba(255,255,255,0.3);
+            margin: 8px 0;
+        }
+        
+        /* Print Styles */
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            
+            .page {
+                box-shadow: none;
+                margin: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <!-- Header -->
+        <div class="header">
+            <div class="header-top">
+                <div class="logo">S</div>
+                <div class="company-info">
+                    <h1>SAFIAN HEALTHCARE & MEDICAL SUPPLIES</h1>
+                    <p>Trusted medical tools, kits & facility supplies</p>
+                </div>
+            </div>
+            <div class="contact-info">
+                <span>📞 0756 597 813</span>
+                <span>✉️ info@safianhealthcare.com</span>
+                <span>📍 Platinum Plaza, Nairobi CBD</span>
+            </div>
+        </div>
+        
+        <!-- Content Area - Type your letter here -->
+        <div class="content" contenteditable="true">
+            <p><strong>Date:</strong> April 30, 2026</p>
+            <p><strong>Ref:</strong> SHC/2026/001</p>
+            <br>
+            <p>Dear [Recipient Name],</p>
+            <br>
+            <p>[Type your letter content here...]</p>
+            <br><br><br><br><br>
+            <p>Yours sincerely,</p>
+            <br><br>
+            <p>_______________________</p>
+            <p><strong>Safian Healthcare & Medical Supplies</strong></p>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <div class="footer-content">
+                <span>Phone: 0756 597 813 | Email: info@safianhealthcare.com</span>
+                <span>Platinum Plaza, Nairobi CBD</span>
+            </div>
+            <hr class="footer-divider">
+            <div>Committed to Quality Healthcare Solutions | Serving Medical Professionals Across Kenya</div>
+        </div>
+    </div>
+</body>
+</html>

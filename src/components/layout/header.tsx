@@ -22,7 +22,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { ReviewsTicker } from "./reviews-ticker";
 
 const primaryNav = [
-  { href: "/", label: "Home" },
+  { href: "/home", label: "Home" },
   { href: "/shop", label: "Shop" },
   { href: "/track-order", label: "Track Order" },
   { href: "/about", label: "About" },

@@ -6,7 +6,7 @@ import { Footer } from "@/components/layout/footer";
 import { MobileBottomBar } from "@/components/layout/mobile-bottom-bar";
 import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
-import { InstallPrompt } from "@/components/pwa/install-prompt";
+import { InstallButton } from "@/components/pwa/install-button";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
 import { Suspense } from "react";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
@@ -123,7 +123,7 @@ export default function RootLayout({
         <Footer />
         <MobileBottomBar />
         <WhatsAppFab />
-        <InstallPrompt />
+        <InstallButton />
         <ServiceWorkerRegister />
         <Suspense fallback={null}>
           <AnalyticsTracker />

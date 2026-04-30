@@ -8,10 +8,10 @@ import { cn } from "@/lib/utils";
 import { useEffect, useState } from "react";
 
 const items = [
-  { href: "/", label: "Home", icon: Home },
   { href: "/shop", label: "Shop", icon: Store },
   { href: "/cart", label: "Cart", icon: ShoppingBag, badge: true },
   { href: "/account", label: "Account", icon: User },
+  { href: "/home", label: "Home", icon: Home },
 ];
 
 export function MobileBottomBar() {

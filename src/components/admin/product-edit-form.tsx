@@ -193,6 +193,8 @@ export function ProductEditForm({ product }: { product: Product }) {
           const fileExt = file.name.split(".").pop() || "png";
           const fileName = `${product.id}/${Date.now()}-${i}.${fileExt}`;
 
+          if (fileName.includes('..')) throw new Error("Invalid file name");
+
           const { error: uploadError } = await supabase.storage
             .from("product-images")
             .upload(fileName, file);

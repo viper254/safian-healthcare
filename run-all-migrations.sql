@@ -98,9 +98,17 @@ SECURITY DEFINER
 AS $$
 DECLARE
   item RECORD;
+  old_status_reduces_stock BOOLEAN;
+  new_status_reduces_stock BOOLEAN;
 BEGIN
-  -- When order status changes from pending to confirmed, reduce stock
-  IF OLD.status = 'pending' AND NEW.status = 'confirmed' THEN
+  -- Determine if old status reduces stock
+  old_status_reduces_stock := OLD.status IN ('confirmed', 'processing', 'dispatched', 'delivered');
+  
+  -- Determine if new status reduces stock
+  new_status_reduces_stock := NEW.status IN ('confirmed', 'processing', 'dispatched', 'delivered');
+
+  -- If transitioning from non-reducing to reducing status, reduce stock
+  IF NOT old_status_reduces_stock AND new_status_reduces_stock THEN
     FOR item IN 
       SELECT product_id, quantity 
       FROM public.order_items 
@@ -112,8 +120,8 @@ BEGIN
     END LOOP;
   END IF;
 
-  -- When order status changes to cancelled, restore stock
-  IF NEW.status = 'cancelled' AND OLD.status != 'cancelled' THEN
+  -- If transitioning from reducing to non-reducing status (cancelled), restore stock
+  IF old_status_reduces_stock AND NOT new_status_reduces_stock THEN
     FOR item IN 
       SELECT product_id, quantity 
       FROM public.order_items 
@@ -137,4 +145,4 @@ CREATE TRIGGER trigger_adjust_stock_on_order_status
   EXECUTE FUNCTION public.adjust_product_stock_on_order_status();
 
 -- Add comment
-COMMENT ON FUNCTION public.adjust_product_stock_on_order_status IS 'Adjusts product stock when order status changes: reduces on confirm, restores on cancel';
+COMMENT ON FUNCTION public.adjust_product_stock_on_order_status IS 'Adjusts product stock when order status changes: reduces on confirmed/processing/dispatched/delivered, restores on cancelled/pending';

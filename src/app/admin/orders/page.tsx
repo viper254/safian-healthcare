@@ -7,9 +7,8 @@ import { getAdminDashboard } from "@/lib/admin-data";
 import { formatDateTime, formatKES } from "@/lib/utils";
 import type { OrderStatus } from "@/types";
 
-// Disable caching for this page
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Revalidate every 30 seconds for admin pages
+export const revalidate = 30;
 
 const statusVariant: Record<
   OrderStatus,

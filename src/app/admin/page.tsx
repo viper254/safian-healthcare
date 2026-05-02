@@ -12,9 +12,8 @@ import { Badge } from "@/components/ui/badge";
 import Link from "next/link";
 import Image from "next/image";
 
-// Disable caching for this page
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
+// Revalidate every 30 seconds for admin dashboard
+export const revalidate = 30;
 
 export default async function AdminDashboardPage() {
   const [data, notifications, unreadCount] = await Promise.all([

@@ -15,17 +15,19 @@ import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
-  display: "swap",
+  display: "optional",
   preload: true,
   fallback: ['system-ui', 'arial'],
+  adjustFontFallback: true,
 });
 const poppins = Poppins({
   subsets: ["latin"],
   weight: ["600", "700"],
   variable: "--font-poppins",
-  display: "swap",
+  display: "optional",
   preload: true,
   fallback: ['system-ui', 'arial'],
+  adjustFontFallback: true,
 });
 
 export const metadata: Metadata = {

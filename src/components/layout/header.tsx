@@ -21,6 +21,7 @@ import { CATEGORY_META, CATEGORY_ORDER, FREE_DELIVERY_OVER_KES } from "@/lib/con
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { ReviewsTicker } from "./reviews-ticker";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
+import { SignOutButton } from "@/components/auth/signout-button";
 
 const primaryNav = [
   { href: "/home", label: "Home" },
@@ -351,11 +352,7 @@ export function Header() {
                     My Account
                   </Link>
                 </Button>
-                <form action="/api/auth/signout" method="post">
-                  <Button type="submit" variant="outline" className="w-full">
-                    Sign out
-                  </Button>
-                </form>
+                <SignOutButton variant="outline" className="w-full" />
               </>
             ) : (
               <>

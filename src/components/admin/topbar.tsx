@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings, Star, ArrowUpRight, LogOut } from "lucide-react";
+import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings, Star, ArrowUpRight } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Logo } from "@/components/brand/logo";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { cn } from "@/lib/utils";
+import { SignOutButton } from "@/components/auth/signout-button";
 
 const mobileItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -166,15 +167,7 @@ export function AdminTopbar({
               <ArrowUpRight className="size-3.5" />
               View storefront
             </Link>
-            <form action="/api/auth/signout" method="post">
-              <button
-                type="submit"
-                className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-destructive transition-colors"
-              >
-                <LogOut className="size-3.5" />
-                Sign out
-              </button>
-            </form>
+            <SignOutButton asMenuItem />
           </div>
         </nav>
       </div>

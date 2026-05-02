@@ -1,7 +1,8 @@
 import Link from "next/link";
-import { Package, User, MapPin, LogOut, ShieldAlert, ArrowRight } from "lucide-react";
+import { Package, User, MapPin, ArrowRight } from "lucide-react";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
+import { SignOutButton } from "@/components/auth/signout-button";
 
 export const dynamic = "force-dynamic";
 
@@ -90,11 +91,7 @@ export default async function AccountPage() {
               </Button>
             </div>
           )}
-          <form action="/api/auth/signout" method="post" className="mt-10">
-            <Button type="submit" variant="outline">
-              <LogOut className="size-4" /> Sign out
-            </Button>
-          </form>
+          <SignOutButton variant="outline" />
         </>
       )}
     </div>

@@ -9,12 +9,12 @@ import {
   ShoppingBag,
   Users,
   Settings,
-  LogOut,
   ArrowUpRight,
   Star,
 } from "lucide-react";
 import { Logo } from "@/components/brand/logo";
 import { cn } from "@/lib/utils";
+import { SignOutButton } from "@/components/auth/signout-button";
 
 const items = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -63,15 +63,7 @@ export function AdminSidebar() {
           <ArrowUpRight className="size-3.5" />
           View storefront
         </Link>
-        <form action="/api/auth/signout" method="post">
-          <button
-            type="submit"
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-xs font-medium text-muted-foreground hover:text-destructive transition-colors"
-          >
-            <LogOut className="size-3.5" />
-            Sign out
-          </button>
-        </form>
+        <SignOutButton asMenuItem />
       </div>
     </aside>
   );

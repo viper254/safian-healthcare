@@ -14,6 +14,8 @@ import {
   CheckCircle2,
   MessageCircle,
   Clock,
+  UserPlus,
+  Info,
 } from "lucide-react";
 import { useCart } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
@@ -56,6 +58,17 @@ export default function CheckoutPage() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [city, setCity] = useState("");
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+
+  // Check authentication status
+  useEffect(() => {
+    async function checkAuth() {
+      const supabase = createSupabaseBrowserClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setIsAuthenticated(!!user);
+    }
+    checkAuth();
+  }, []);
 
   // Auto-fill user details if logged in
   useEffect(() => {
@@ -94,6 +107,62 @@ export default function CheckoutPage() {
     );
   }
 
+  // Require authentication to place orders
+  if (isAuthenticated === false) {
+    return (
+      <div className="container py-20">
+        <div className="max-w-md mx-auto">
+          <div className="rounded-2xl border bg-card p-8 text-center shadow-sm">
+            <div className="inline-flex size-16 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 mb-6">
+              <UserPlus className="size-8" />
+            </div>
+            
+            <h1 className="font-display font-bold text-2xl mb-3">Account Required</h1>
+            
+            <p className="text-muted-foreground mb-8">
+              You need an account to place orders and track your deliveries.
+            </p>
+
+            <div className="flex flex-col gap-3">
+              <Button
+                asChild
+                size="lg"
+                variant="gradient"
+              >
+                <Link href="/register?redirect=/checkout">
+                  Create Account
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+              >
+                <Link href="/login?redirect=/checkout">
+                  Sign In
+                </Link>
+              </Button>
+            </div>
+
+            <p className="text-xs text-muted-foreground mt-6">
+              Already have an account? <Link href="/login?redirect=/checkout" className="text-blue-600 hover:underline">Sign in here</Link>
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading state while checking authentication
+  if (isAuthenticated === null) {
+    return (
+      <div className="container py-20 text-center">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-brand-green-600"></div>
+        <p className="mt-4 text-muted-foreground">Loading checkout...</p>
+      </div>
+    );
+  }
+
   async function handleWhatsAppOrder() {
     if (!name.trim() || !phone.trim() || !city.trim()) {
       setError("Please enter your name, phone number, and city");
@@ -126,7 +195,25 @@ export default function CheckoutPage() {
       
       if (!response.ok) {
         console.error("Order creation failed:", data);
-        throw new Error(data.error || "Failed to create order");
+        
+        // Handle specific error cases with helpful messages
+        if (response.status === 401 || response.status === 403) {
+          setError("Authentication required. Please sign in or create an account to place orders.");
+          setLoading(false);
+          setIsAuthenticated(false); // Show the auth banner
+          return;
+        }
+        
+        if (response.status === 400) {
+          const errorMsg = data.error || data.details?.[0]?.message || "Please check your order details and try again";
+          throw new Error(errorMsg);
+        }
+        
+        if (response.status === 500) {
+          throw new Error("Server error. Please try again or contact us via WhatsApp.");
+        }
+        
+        throw new Error(data.error || "Failed to create order. Please try again.");
       }
 
       if (!data.reference) {
@@ -169,7 +256,26 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
       router.push(`/order-success?ref=${orderReference}`);
     } catch (err: any) {
       console.error("Order error:", err);
-      setError(err.message || "Failed to create order. Please try again or contact us via WhatsApp.");
+      
+      // Provide user-friendly error messages
+      let errorMessage = "";
+      
+      if (err.message) {
+        errorMessage = err.message;
+      } else if (err.code === 'PGRST116') {
+        errorMessage = "One or more products are no longer available. Please check your cart.";
+      } else if (err.code === '23505') {
+        errorMessage = "This order already exists. Please refresh the page and try again.";
+      } else if (err.code === '42501') {
+        errorMessage = "Permission denied. Please sign in or create an account to place orders.";
+        setIsAuthenticated(false); // Show auth banner
+      } else if (err.code === 'PGRST301') {
+        errorMessage = "Database connection error. Please try again in a moment.";
+      } else {
+        errorMessage = "Failed to create order. Please try again or contact us via WhatsApp at " + COMPANY_CONTACT.phoneFormatted;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -186,8 +292,18 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
         <div className="space-y-8">
           {/* Error Message */}
           {error && (
-            <div className="rounded-lg bg-destructive/10 border border-destructive text-destructive px-4 py-3 text-sm">
-              {error}
+            <div className="rounded-lg bg-destructive/10 border border-destructive px-4 py-3">
+              <div className="flex items-start gap-3">
+                <svg className="size-5 text-destructive shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                <div className="flex-1">
+                  <p className="font-semibold text-destructive text-sm mb-1">Order Failed</p>
+                  <p className="text-sm text-destructive/90">{error}</p>
+                </div>
+              </div>
             </div>
           )}
 

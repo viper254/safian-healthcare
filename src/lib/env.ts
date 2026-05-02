@@ -27,7 +27,7 @@ export const env = {
   contact: {
     phone: getEnvVar("NEXT_PUBLIC_CONTACT_PHONE", false) || "0756 597 813",
     whatsapp: getEnvVar("NEXT_PUBLIC_CONTACT_WHATSAPP", false) || "254756597813",
-    email: getEnvVar("NEXT_PUBLIC_CONTACT_EMAIL", false) || "info@safianhealthcare.com",
+    email: getEnvVar("NEXT_PUBLIC_CONTACT_EMAIL", false) || "safianmedicalsupplies@gmail.com",
   },
   
   // Analytics (optional)

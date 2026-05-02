@@ -142,7 +142,7 @@ The app has 10-second timeouts configured for Supabase calls to prevent hanging.
 - **Till Number**: 5517358
 - **Business Name**: SAFIAN SUPPLIES
 - **Phone**: +254 756 597 813
-- **Email**: info@safianhealthcare.com
+- **Email**: safianmedicalsupplies@gmail.com
 
 ## Tech Stack
 

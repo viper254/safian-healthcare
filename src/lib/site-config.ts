@@ -16,7 +16,7 @@ export const siteConfig = {
     phoneFormatted: "+254 756 597 813",
     whatsapp: "254756597813", // Format: country code + number without +
     whatsappDisplay: "0756 597 813",
-    email: "info@safianhealthcare.com",
+    email: "safianmedicalsupplies@gmail.com",
     location: "Platinum Plaza, Nairobi CBD",
     locationFull: "Platinum Plaza, Nairobi CBD, Kenya",
   },

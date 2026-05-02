@@ -6,7 +6,7 @@ export const SITE_SHORT = "Safian";
 export const COMPANY_CONTACT = {
   phone: "+254756597813",
   phoneFormatted: "+254 756 597 813",
-  email: "info@safianhealthcare.com",
+  email: "safianmedicalsupplies@gmail.com",
   whatsapp: "254756597813", // Format for WhatsApp API (no + or spaces)
   whatsappDisplay: "+254 756 597 813",
   tillNumber: "5517358", // M-Pesa Till Number

@@ -113,7 +113,7 @@ npm start
 
 ## 📞 Contact
 - **Phone**: 0756 597 813
-- **Email**: info@safianhealthcare.com
+- **Email**: safianmedicalsupplies@gmail.com
 - **Location**: Platinum Plaza, Nairobi CBD
 
 ## 📄 License

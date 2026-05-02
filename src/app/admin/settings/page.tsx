@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SITE_NAME, COMPANY_CONTACT } from "@/lib/constants";
 import { ResetOrdersSection } from "@/components/admin/reset-orders-section";
+import { ClearCacheButton } from "@/components/pwa/clear-cache-button";
 
 export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
@@ -157,7 +158,22 @@ export default function AdminSettingsPage() {
       </div>
 
       {/* Danger Zone - Full Width */}
-      <div className="px-4 sm:px-6 pb-6">
+      <div className="px-4 sm:px-6 pb-6 space-y-6">
+        {/* Cache Management */}
+        <div className="rounded-2xl border border-amber-500/30 bg-amber-50 dark:bg-amber-950/20 p-6">
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <h3 className="font-semibold text-amber-900 dark:text-amber-100 mb-1">
+                Cache Management
+              </h3>
+              <p className="text-sm text-amber-700 dark:text-amber-300 mb-4">
+                If the site becomes unresponsive or buttons don't work, clear the cache to force reload fresh content. This will clear all cached pages and service workers.
+              </p>
+              <ClearCacheButton />
+            </div>
+          </div>
+        </div>
+
         <ResetOrdersSection />
       </div>
     </>

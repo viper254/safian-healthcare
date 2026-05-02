@@ -1,6 +1,8 @@
 // Service Worker for Safian Healthcare PWA
-const CACHE_NAME = 'safian-v1';
-const RUNTIME_CACHE = 'safian-runtime';
+// Increment version to force cache refresh when code changes
+const CACHE_VERSION = '2';
+const CACHE_NAME = `safian-v${CACHE_VERSION}`;
+const RUNTIME_CACHE = `safian-runtime-v${CACHE_VERSION}`;
 
 // Assets to cache on install (only local assets)
 const PRECACHE_ASSETS = [
@@ -55,7 +57,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// Fetch event - network first, fallback to cache
+// Fetch event - network first with proper cache invalidation
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -65,17 +67,20 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Skip API routes and admin routes from caching
-  if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/admin')) {
+  // Skip API routes, admin routes, and auth routes from caching
+  if (url.pathname.startsWith('/api/') || 
+      url.pathname.startsWith('/admin') || 
+      url.pathname.startsWith('/_next/data/')) {
     return;
   }
 
-  // For navigation requests (page loads)
+  // For navigation requests (page loads) - NETWORK FIRST
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          if (response && response.ok) {
+          // Only cache successful responses
+          if (response && response.ok && response.status === 200) {
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
               cache.put(request, responseClone).catch(() => {});
@@ -84,6 +89,7 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
+          // Only use cache if network fails (offline)
           return caches.match(request)
             .then((cachedResponse) => cachedResponse || caches.match('/offline'));
         })
@@ -91,8 +97,29 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  // For static assets (_next/static/*) - cache first for performance
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(
+      caches.match(request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(request).then((response) => {
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone).catch(() => {});
+            });
+          }
+          return response;
+        });
+      })
+    );
+    return;
+  }
+
   // For all other requests, just let them through normally
-  // Don't intercept images, styles, scripts - let browser handle them
+  // Don't intercept - let browser handle them
 });
 
 // Background sync for offline orders (future enhancement)

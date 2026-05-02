@@ -143,7 +143,7 @@ const config: Config = {
         "pulse-ring": "pulse-ring 2s infinite",
         heartbeat: "heartbeat 1.8s ease-in-out infinite",
         marquee: "marquee 30s linear infinite",
-        "scroll-left": "scroll-left 40s linear infinite",
+        "scroll-left": "scroll-left 20s linear infinite",
       },
       backgroundImage: {
         "brand-gradient":

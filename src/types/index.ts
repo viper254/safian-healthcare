@@ -1,4 +1,8 @@
 export type CategorySlug =
+  | "medical-students"
+  | "doctors-and-professionals"
+  | "facilities-hospitals-clinics"
+  | "general-public-patients-hbc"
   | "diagnostic-essentials"
   | "procedure-practical-kits"
   | "medical-wear-protective-gear"
@@ -70,7 +74,7 @@ export type OrderStatus =
 
 export type PaymentStatus = "unpaid" | "paid" | "refunded" | "failed";
 
-export type PaymentMethod = "mpesa" | "card" | "cash_on_delivery" | "bank_transfer";
+export type PaymentMethod = "mpesa" | "till" | "card" | "cash_on_delivery" | "bank_transfer";
 
 export interface Order {
   id: string;

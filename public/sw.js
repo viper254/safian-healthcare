@@ -42,6 +42,19 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Message event - handle messages from clients
+self.addEventListener('message', (event) => {
+  // Handle skip waiting message
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+  
+  // Always respond to prevent "message channel closed" errors
+  if (event.ports && event.ports[0]) {
+    event.ports[0].postMessage({ success: true });
+  }
+});
+
 // Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
   const { request } = event;

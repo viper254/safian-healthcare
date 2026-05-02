@@ -116,7 +116,7 @@ export default function CheckoutPage() {
           subtotal: sub,
           delivery_fee: delivery,
           total,
-          payment_method: "whatsapp",
+          payment_method: "till",
           payment_status: "unpaid",
           status: "pending",
         }),
@@ -135,7 +135,7 @@ export default function CheckoutPage() {
 
       const orderReference = data.reference;
       
-      // Prepare WhatsApp message with order reference
+      // Prepare WhatsApp message with order details
       const itemsList = lines
         .map((l) => `* ${l.name}\n  (${formatKES(l.unit_price)} x ${l.quantity})`)
         .join("\n\n");
@@ -155,7 +155,7 @@ Subtotal: ${formatKES(sub)}
 Delivery: ${delivery === 0 ? "FREE" : formatKES(delivery)}
 *Total: ${formatKES(total)}*
 
-Please confirm availability and delivery. Thank you!`;
+PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
       
       const whatsappUrl = `https://wa.me/${COMPANY_CONTACT.whatsapp}?text=${encodeURIComponent(message)}`;
       
@@ -179,7 +179,7 @@ Please confirm availability and delivery. Thank you!`;
     <div className="container py-8 md:py-12">
       <h1 className="font-display font-bold text-3xl">Checkout</h1>
       <p className="text-sm text-muted-foreground mt-1">
-        Complete your order via WhatsApp — fast, secure, and convenient.
+        Pay via M-Pesa Till Number {COMPANY_CONTACT.tillNumber} and confirm via WhatsApp.
       </p>
       
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
@@ -191,17 +191,38 @@ Please confirm availability and delivery. Thank you!`;
             </div>
           )}
 
-          {/* WhatsApp Order Section */}
+          {/* Till Number Payment Section */}
           <section className="rounded-2xl border-2 border-brand-green-500/30 bg-gradient-to-br from-brand-green-50 to-white dark:from-brand-green-950/20 dark:to-background p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="size-12 rounded-full bg-brand-green-500 flex items-center justify-center shrink-0">
-                <MessageCircle className="size-6 text-white" />
+                <Smartphone className="size-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg">Order via WhatsApp</h2>
+                <h2 className="font-semibold text-lg">Pay via M-Pesa Till</h2>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Enter your details below, then we'll send your order to our team via WhatsApp.
+                  Enter your details below, then pay to our M-Pesa Till Number and send confirmation via WhatsApp.
                 </p>
+                
+                {/* Till Number Display */}
+                <div className="mb-4 p-4 rounded-lg bg-white dark:bg-background border-2 border-brand-green-500">
+                  <p className="text-xs text-muted-foreground mb-1">M-Pesa Till Number</p>
+                  <div className="flex items-center justify-between">
+                    <p className="text-2xl font-bold text-brand-green-600">{COMPANY_CONTACT.tillNumber}</p>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        navigator.clipboard.writeText(COMPANY_CONTACT.tillNumber);
+                      }}
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    SAFIAN SUPPLIES
+                  </p>
+                </div>
                 
                 <div className="space-y-3 mb-4">
                   <div>
@@ -248,8 +269,11 @@ Please confirm availability and delivery. Thank you!`;
                   disabled={loading}
                 >
                   <MessageCircle className="size-5" />
-                  {loading ? "Creating order..." : "Order on WhatsApp"}
+                  {loading ? "Creating order..." : "Send Order via WhatsApp"}
                 </Button>
+                <p className="text-xs text-muted-foreground mt-2">
+                  After payment, send M-Pesa confirmation message via WhatsApp
+                </p>
               </div>
             </div>
           </section>
@@ -257,39 +281,70 @@ Please confirm availability and delivery. Thank you!`;
           {/* Payment Methods - Coming Soon */}
           <section className="rounded-2xl border bg-card p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-4">
-              <h2 className="font-semibold text-lg">Online Payment</h2>
-              <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 text-xs font-medium">
-                <Clock className="size-3" />
-                Coming Soon
-              </span>
+              <h2 className="font-semibold text-lg">Payment Method</h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-4">
-              We're working on integrating secure online payment options. For now, please use WhatsApp to complete your order.
-            </p>
-            <div className="grid sm:grid-cols-2 gap-3">
-              {methods.map((m) => {
-                const Icon = m.icon;
-                return (
-                  <div
-                    key={m.id}
-                    className="text-left rounded-xl border p-4 opacity-60 cursor-not-allowed bg-muted/30"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="inline-flex size-10 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                        <Icon className="size-5" />
-                      </span>
-                      <div>
-                        <p className="font-semibold text-sm">{m.label}</p>
-                        <p className="text-xs text-muted-foreground">{m.desc}</p>
-                      </div>
+            <div className="rounded-xl border-2 border-brand-green-500 bg-brand-green-50 dark:bg-brand-green-950/20 p-6">
+              <div className="flex items-start gap-4">
+                <div className="size-12 rounded-xl bg-brand-green-500 text-white flex items-center justify-center shrink-0">
+                  <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="2" y="5" width="20" height="14" rx="2"/>
+                    <line x1="2" y1="10" x2="22" y2="10"/>
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-bold text-lg mb-2">Lipa na M-PESA</h3>
+                  <div className="space-y-3 text-sm">
+                    <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border-2 border-brand-green-500">
+                      <p className="text-xs text-muted-foreground mb-1">Buy Goods Till Number</p>
+                      <p className="text-2xl font-bold text-brand-green-600 dark:text-brand-green-400 tracking-wider">5517358</p>
+                      <p className="text-xs text-muted-foreground mt-1">SAFIAN SUPPLIES</p>
+                    </div>
+                    <div className="space-y-2">
+                      <p className="font-semibold text-brand-green-700 dark:text-brand-green-300">Payment Instructions:</p>
+                      <ol className="space-y-1.5 text-sm">
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">1.</span>
+                          <span>Go to M-PESA menu on your phone</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">2.</span>
+                          <span>Select <strong>Lipa na M-PESA</strong></span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">3.</span>
+                          <span>Select <strong>Buy Goods and Services</strong></span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">4.</span>
+                          <span>Enter Till Number: <strong className="text-brand-green-600 dark:text-brand-green-400">5517358</strong></span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">5.</span>
+                          <span>Enter amount: <strong className="text-brand-green-600 dark:text-brand-green-400">{formatKES(total)}</strong></span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">6.</span>
+                          <span>Enter your M-PESA PIN and confirm</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">7.</span>
+                          <span>You will receive a confirmation SMS</span>
+                        </li>
+                      </ol>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
+                      <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">After Payment:</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400">
+                        Send the M-PESA confirmation message to <strong>0756 597 813</strong> via WhatsApp or SMS with your order details.
+                      </p>
                     </div>
                   </div>
-                );
-              })}
+                </div>
+              </div>
             </div>
             <p className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
               <ShieldCheck className="size-4 text-brand-green-500" />
-              All payments will be processed securely when available.
+              Secure M-PESA payment. Your order will be processed once payment is confirmed.
             </p>
           </section>
         </div>

@@ -16,9 +16,10 @@ export default async function AdminProductEditPage({
     .select(`
       *,
       category:categories(id, name, slug),
-      images:product_images(*)
+      images:product_images(id, url, alt, sort_order)
     `)
     .eq("id", id)
+    .order("sort_order", { referencedTable: "product_images", ascending: true })
     .single();
 
   if (error || !product) {

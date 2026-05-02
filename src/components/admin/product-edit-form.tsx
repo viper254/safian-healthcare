@@ -51,8 +51,9 @@ export function ProductEditForm({ product }: { product: Product }) {
   const [categories, setCategories] = useState<Category[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // State for images
-  const [existingImages, setExistingImages] = useState<ProductImage[]>(product.images || []);
+  // State for images - sort by sort_order
+  const sortedImages = (product.images || []).sort((a, b) => a.sort_order - b.sort_order);
+  const [existingImages, setExistingImages] = useState<ProductImage[]>(sortedImages);
   const [newFiles, setNewFiles] = useState<File[]>([]);
   const [previews, setPreviews] = useState<string[]>([]);
 
@@ -73,6 +74,7 @@ export function ProductEditForm({ product }: { product: Product }) {
     is_featured: product.is_featured,
     is_active: product.is_active,
   });
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
     async function fetchCategories() {
@@ -84,8 +86,22 @@ export function ProductEditForm({ product }: { product: Product }) {
       
       if (data) setCategories(data);
     }
+    
+    async function fetchProductCategories() {
+      const supabase = createSupabaseBrowserClient();
+      const { data } = await supabase
+        .from("product_categories")
+        .select("category_id")
+        .eq("product_id", product.id);
+      
+      if (data) {
+        setSelectedCategories(data.map(pc => pc.category_id));
+      }
+    }
+    
     fetchCategories();
-  }, []);
+    fetchProductCategories();
+  }, [product.id]);
 
   // Handle clipboard paste
   useEffect(() => {
@@ -116,6 +132,16 @@ export function ProductEditForm({ product }: { product: Product }) {
       ...prev,
       [name]: type === "checkbox" ? checked : value
     }));
+  }
+
+  function handleCategoryToggle(categoryId: string) {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      } else {
+        return [...prev, categoryId];
+      }
+    });
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -186,6 +212,27 @@ export function ProductEditForm({ product }: { product: Product }) {
 
       if (updateError) throw updateError;
 
+      // 1.5. Update product-category relationships
+      const supabase2 = createSupabaseBrowserClient();
+      
+      // Delete existing relationships
+      await supabase2
+        .from("product_categories")
+        .delete()
+        .eq("product_id", product.id);
+      
+      // Insert new relationships
+      if (selectedCategories.length > 0) {
+        const categoryRelations = selectedCategories.map(categoryId => ({
+          product_id: product.id,
+          category_id: categoryId,
+        }));
+
+        await supabase2
+          .from("product_categories")
+          .insert(categoryRelations);
+      }
+
       // 2. Upload and save new images
       if (newFiles.length > 0) {
         for (let i = 0; i < newFiles.length; i++) {
@@ -250,7 +297,7 @@ export function ProductEditForm({ product }: { product: Product }) {
                   <Input id="slug" name="slug" required value={formData.slug} onChange={handleChange} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="category_id">Category *</Label>
+                  <Label htmlFor="category_id">Primary Category *</Label>
                   <select
                     id="category_id"
                     name="category_id"
@@ -259,11 +306,33 @@ export function ProductEditForm({ product }: { product: Product }) {
                     onChange={handleChange}
                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                   >
-                    <option value="">Select a category...</option>
+                    <option value="">Select primary category...</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>{cat.name}</option>
                     ))}
                   </select>
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Additional Categories (Optional)</Label>
+                <p className="text-xs text-muted-foreground mb-3">
+                  Select all categories this product belongs to
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/30">
+                  {categories.map((cat) => (
+                    <div key={cat.id} className="flex items-start gap-2">
+                      <input
+                        type="checkbox"
+                        id={`cat-${cat.id}`}
+                        checked={selectedCategories.includes(cat.id)}
+                        onChange={() => handleCategoryToggle(cat.id)}
+                        className="size-4 rounded border-input mt-0.5"
+                      />
+                      <Label htmlFor={`cat-${cat.id}`} className="cursor-pointer text-sm font-normal">
+                        {cat.name}
+                      </Label>
+                    </div>
+                  ))}
                 </div>
               </div>
               <div className="space-y-2">
@@ -302,11 +371,23 @@ export function ProductEditForm({ product }: { product: Product }) {
               </div>
 
               {/* Image Grid */}
+              {existingImages.length === 0 && previews.length === 0 && (
+                <div className="col-span-full text-center py-8 text-muted-foreground">
+                  <ImageIcon className="size-12 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">No images yet. Upload or paste images above.</p>
+                </div>
+              )}
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {/* Existing Images */}
                 {existingImages.map((img, i) => (
                   <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border bg-muted">
-                    <Image src={img.url} alt={img.alt || ""} fill className="object-cover" />
+                    <Image 
+                      src={img.url} 
+                      alt={img.alt || ""} 
+                      fill 
+                      className="object-cover"
+                      unoptimized
+                    />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <button
                         type="button"

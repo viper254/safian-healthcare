@@ -39,7 +39,7 @@ export function ManualOrderForm() {
     shipping_address: "",
     shipping_city: "",
     shipping_notes: "",
-    payment_method: "whatsapp" as const,
+    payment_method: "mpesa_till" as const,
     payment_status: "unpaid" as const,
     status: "pending" as const,
     delivery_fee: "350",

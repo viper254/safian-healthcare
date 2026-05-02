@@ -317,7 +317,7 @@ export function Hero({ categories = [] }: { categories?: Category[] }) {
                 transition={{ delay: 0.5, duration: 0.5 }}
                 className="absolute top-4 left-4 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-xs font-semibold shadow"
               >
-                Free delivery · Orders over {formatKES(freeDeliveryThreshold)}
+                Free delivery on orders over {formatKES(freeDeliveryThreshold)}
               </motion.div>
             </motion.div>
           </AnimatePresence>

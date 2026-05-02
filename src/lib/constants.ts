@@ -9,6 +9,7 @@ export const COMPANY_CONTACT = {
   email: "info@safianhealthcare.com",
   whatsapp: "254756597813", // Format for WhatsApp API (no + or spaces)
   whatsappDisplay: "+254 756 597 813",
+  tillNumber: "5517358", // M-Pesa Till Number
   address: "Platinum Plaza, Nairobi CBD",
 };
 
@@ -16,6 +17,38 @@ export const CATEGORY_META: Record<
   CategorySlug,
   { name: string; description: string; icon: string; accent: "orange" | "green"; image: string }
 > = {
+  "medical-students": {
+    name: "Medical Students",
+    description:
+      "Essential tools and supplies for medical students including diagnostic equipment, study materials, and practical kits.",
+    icon: "GraduationCap",
+    accent: "green",
+    image: "",
+  },
+  "doctors-and-professionals": {
+    name: "Doctors and Professionals",
+    description:
+      "Professional-grade medical equipment and supplies for practicing doctors and healthcare professionals.",
+    icon: "Stethoscope",
+    accent: "orange",
+    image: "",
+  },
+  "facilities-hospitals-clinics": {
+    name: "Facilities, Hospitals and Clinics",
+    description:
+      "Bulk medical supplies, equipment, and facility management solutions for hospitals, clinics, and healthcare facilities.",
+    icon: "Building2",
+    accent: "green",
+    image: "",
+  },
+  "general-public-patients-hbc": {
+    name: "General Public and Patients [HBC]",
+    description:
+      "Home-based care supplies, patient support devices, and medical products for general public use.",
+    icon: "Users",
+    accent: "orange",
+    image: "",
+  },
   "diagnostic-essentials": {
     name: "Diagnostic Essentials",
     description:
@@ -64,6 +97,10 @@ export const CATEGORY_META: Record<
 };
 
 export const CATEGORY_ORDER: CategorySlug[] = [
+  "medical-students",
+  "doctors-and-professionals",
+  "facilities-hospitals-clinics",
+  "general-public-patients-hbc",
   "diagnostic-essentials",
   "procedure-practical-kits",
   "medical-wear-protective-gear",

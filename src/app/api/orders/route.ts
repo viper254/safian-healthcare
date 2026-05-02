@@ -23,7 +23,7 @@ const orderSchema = z.object({
   address: z.string().optional(),
   city: z.string().min(2, "City is required").optional(),
   notes: z.string().optional(),
-  payment_method: z.enum(["mpesa", "card", "cash_on_delivery", "bank_transfer", "whatsapp"]),
+  payment_method: z.enum(["mpesa", "till", "card", "cash_on_delivery", "bank_transfer"]),
   payment_status: z.enum(["unpaid", "paid", "refunded", "failed"]).optional(),
   status: z.enum(["pending", "confirmed", "processing", "dispatched", "delivered", "cancelled"]).optional(),
   lines: z.array(cartLineSchema).min(1, "Cart must have at least one item"),

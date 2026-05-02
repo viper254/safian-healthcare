@@ -8,6 +8,7 @@ import { WhatsAppFab } from "@/components/layout/whatsapp-fab";
 import { AnalyticsTracker } from "@/components/analytics/analytics-tracker";
 import { InstallButton } from "@/components/pwa/install-button";
 import { ServiceWorkerRegister } from "@/components/pwa/service-worker-register";
+import { Toaster } from "@/components/ui/toaster";
 import { Suspense } from "react";
 import { SITE_NAME, SITE_TAGLINE } from "@/lib/constants";
 
@@ -116,6 +117,20 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
         <meta name="apple-mobile-web-app-title" content="Safian Healthcare" />
         <link rel="apple-touch-icon" href="/logo.jpeg" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const theme = localStorage.getItem('safian-theme') || 'light';
+                if (theme === 'dark' || (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                  document.documentElement.classList.add('dark');
+                } else {
+                  document.documentElement.classList.remove('dark');
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
       </head>
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <Header />
@@ -125,6 +140,7 @@ export default function RootLayout({
         <WhatsAppFab />
         <InstallButton />
         <ServiceWorkerRegister />
+        <Toaster />
         <Suspense fallback={null}>
           <AnalyticsTracker />
         </Suspense>

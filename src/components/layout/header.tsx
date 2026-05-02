@@ -20,6 +20,7 @@ import { useCart } from "@/store/cart-store";
 import { CATEGORY_META, CATEGORY_ORDER, FREE_DELIVERY_OVER_KES } from "@/lib/constants";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { ReviewsTicker } from "./reviews-ticker";
+import { ThemeToggle } from "@/components/theme/theme-toggle";
 
 const primaryNav = [
   { href: "/home", label: "Home" },
@@ -157,7 +158,7 @@ export function Header() {
               <circle cx="18.5" cy="18.5" r="2.5"></circle>
             </svg>
             <span className="text-sm font-semibold">
-              FREE Delivery over {formatKES(freeDeliveryThreshold)}
+              FREE Delivery on orders over {formatKES(freeDeliveryThreshold)}
               <span className="hidden md:inline"> · Fast 24hrs-4 days nationwide</span>
             </span>
           </div>
@@ -225,6 +226,7 @@ export function Header() {
               />
             </div>
           </form>
+          <ThemeToggle />
           <Link
             href="/account"
             className="hidden sm:inline-flex size-10 items-center justify-center rounded-full hover:bg-accent"
@@ -266,14 +268,14 @@ export function Header() {
       </div>
 
       {/* Categories sub-nav (desktop) */}
-      <div className="hidden lg:block border-t border-border/60 bg-background">
+      <div className="hidden lg:block border-t border-brand-blue-200 bg-brand-blue-50 dark:bg-brand-blue-900/20 dark:border-brand-blue-800">
         <div className="container flex h-11 items-center gap-5 overflow-x-auto no-scrollbar text-sm">
-          <span className="text-muted-foreground font-medium">Browse:</span>
+          <span className="text-brand-blue-700 dark:text-brand-blue-300 font-semibold">Browse:</span>
           {CATEGORY_ORDER.map((slug) => (
             <Link
               key={slug}
               href={`/shop/${slug}`}
-              className="text-foreground/70 hover:text-primary transition-colors font-medium whitespace-nowrap"
+              className="text-brand-blue-600 dark:text-brand-blue-200 hover:text-brand-blue-800 dark:hover:text-brand-blue-100 transition-colors font-medium whitespace-nowrap hover:underline underline-offset-4"
             >
               {CATEGORY_META[slug].name}
             </Link>

@@ -12,6 +12,7 @@ import {
   Syringe,
   Shield,
   BookOpen,
+  Users,
   type LucideIcon,
 } from "lucide-react";
 import { CATEGORY_META, CATEGORY_ORDER } from "@/lib/constants";
@@ -22,6 +23,7 @@ const iconMap: Record<string, LucideIcon> = {
   Stethoscope,
   HeartPulse,
   Building2,
+  Users,
   Syringe,
   Shield,
   BookOpen,
@@ -88,7 +90,7 @@ export function CategoriesShowcase({ categories = [] }: { categories?: Category[
           </h2>
         </div>
         <p className="max-w-md text-muted-foreground text-sm">
-          From medical students to healthcare professionals, facilities, and patients — we provide comprehensive medical supplies and equipment across five specialized categories.
+          From medical students to healthcare professionals, facilities, and patients — we provide comprehensive medical supplies and equipment across all specialized categories.
         </p>
       </div>
 

@@ -11,6 +11,7 @@ const productSchema = z.object({
   brand: z.string().max(100).optional().nullable(),
   sku: z.string().max(100).optional().nullable(),
   category_id: z.string().uuid("Invalid category ID").optional().nullable(),
+  category_ids: z.array(z.string().uuid()).optional().default([]), // Multiple categories
   original_price: z.number().positive("Price must be positive"),
   discounted_price: z.number().positive().optional().nullable(),
   offer_price: z.number().positive().optional().nullable(),
@@ -90,6 +91,23 @@ export async function POST(request: Request) {
       }
       
       return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
+    }
+
+    // Insert product-category relationships
+    if (body.category_ids && body.category_ids.length > 0) {
+      const categoryRelations = body.category_ids.map(categoryId => ({
+        product_id: data.id,
+        category_id: categoryId,
+      }));
+
+      const { error: categoryError } = await supabase
+        .from("product_categories")
+        .insert(categoryRelations);
+
+      if (categoryError) {
+        console.error("Error creating product-category relations:", categoryError);
+        // Don't fail the whole operation, just log the error
+      }
     }
 
     return NextResponse.json(data, { headers: rateLimitHeaders });

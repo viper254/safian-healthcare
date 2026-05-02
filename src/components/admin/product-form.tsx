@@ -44,6 +44,7 @@ export function ProductForm({ productId }: { productId?: string }) {
     is_featured: false,
     is_active: true,
   });
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   // Fetch categories on mount
   useEffect(() => {
@@ -108,6 +109,16 @@ export function ProductForm({ productId }: { productId?: string }) {
     }));
   }
 
+  function handleCategoryToggle(categoryId: string) {
+    setSelectedCategories(prev => {
+      if (prev.includes(categoryId)) {
+        return prev.filter(id => id !== categoryId);
+      } else {
+        return [...prev, categoryId];
+      }
+    });
+  }
+
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const files = Array.from(e.target.files || []);
     const newImages = files.map(file => ({
@@ -149,6 +160,7 @@ export function ProductForm({ productId }: { productId?: string }) {
         low_stock_threshold: parseInt(formData.low_stock_threshold),
         is_featured: formData.is_featured,
         is_active: formData.is_active,
+        category_ids: selectedCategories, // Add selected categories
       };
 
       // Create product via API
@@ -249,9 +261,9 @@ export function ProductForm({ productId }: { productId?: string }) {
           </p>
         </div>
 
-        {/* Category */}
+        {/* Category - Primary */}
         <div>
-          <Label htmlFor="category_id">Category *</Label>
+          <Label htmlFor="category_id">Primary Category *</Label>
           <select
             id="category_id"
             name="category_id"
@@ -260,13 +272,40 @@ export function ProductForm({ productId }: { productId?: string }) {
             onChange={handleChange}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
           >
-            <option value="">Select a category...</option>
+            <option value="">Select primary category...</option>
             {categories.map((cat) => (
               <option key={cat.id} value={cat.id}>
                 {cat.name}
               </option>
             ))}
           </select>
+          <p className="text-xs text-muted-foreground mt-1">
+            The main category for this product
+          </p>
+        </div>
+
+        {/* Additional Categories */}
+        <div>
+          <Label>Additional Categories (Optional)</Label>
+          <p className="text-xs text-muted-foreground mb-3">
+            Select all categories this product belongs to
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/30">
+            {categories.map((cat) => (
+              <div key={cat.id} className="flex items-start gap-2">
+                <input
+                  type="checkbox"
+                  id={`cat-${cat.id}`}
+                  checked={selectedCategories.includes(cat.id)}
+                  onChange={() => handleCategoryToggle(cat.id)}
+                  className="size-4 rounded border-input mt-0.5"
+                />
+                <Label htmlFor={`cat-${cat.id}`} className="cursor-pointer text-sm font-normal">
+                  {cat.name}
+                </Label>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Short Description */}

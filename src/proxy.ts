@@ -2,7 +2,20 @@ import type { NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/middleware";
 import { NextResponse } from "next/server";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
+  // Force HTTPS redirect in production
+  const url = request.nextUrl.clone();
+  const proto = request.headers.get("x-forwarded-proto");
+  
+  if (
+    process.env.NODE_ENV === "production" &&
+    proto === "http" &&
+    !url.hostname.includes("localhost")
+  ) {
+    url.protocol = "https:";
+    return NextResponse.redirect(url, 301);
+  }
+
   // Update Supabase session
   const response = await updateSession(request);
   

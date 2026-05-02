@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { SITE_NAME, COMPANY_CONTACT } from "@/lib/constants";
+import { ResetOrdersSection } from "@/components/admin/reset-orders-section";
 
 export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
@@ -153,6 +154,11 @@ export default function AdminSettingsPage() {
             Note: These settings are currently read-only. To update, modify the values in <code className="bg-muted px-1 py-0.5 rounded">src/lib/constants.ts</code>
           </p>
         </form>
+      </div>
+
+      {/* Danger Zone - Full Width */}
+      <div className="px-4 sm:px-6 pb-6">
+        <ResetOrdersSection />
       </div>
     </>
   );

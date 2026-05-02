@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Package, User, MapPin, ArrowRight } from "lucide-react";
+import { Package, User, MapPin, ArrowRight, ShieldAlert } from "lucide-react";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { SignOutButton } from "@/components/auth/signout-button";

@@ -12,50 +12,46 @@ export function ContactForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setIsSubmitting(true);
 
     const formData = new FormData(e.currentTarget);
-    const data = {
-      name: formData.get("name") as string,
-      email: formData.get("email") as string,
-      phone: formData.get("phone") as string,
-      org: formData.get("org") as string,
-      subject: formData.get("subject") as string,
-      message: formData.get("message") as string,
-    };
+    const name = formData.get("name") as string;
+    const email = formData.get("email") as string;
+    const phone = formData.get("phone") as string;
+    const org = formData.get("org") as string;
+    const subject = formData.get("subject") as string;
+    const message = formData.get("message") as string;
 
-    try {
-      const response = await fetch("/api/contact", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+    // Construct email body with all form details
+    const emailBody = `
+Name: ${name}
+Email: ${email}
+Phone: ${phone}
+${org ? `Organisation: ${org}` : ''}
 
-      if (!response.ok) {
-        throw new Error("Failed to send message");
-      }
+Message:
+${message}
+    `.trim();
 
-      toast({
-        title: "Message sent successfully!",
-        description: "We'll get back to you within a few hours.",
-      });
+    // Construct mailto link with encoded parameters
+    const mailtoLink = `mailto:safianmedicalsupplies@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
 
-      // Reset form
+    // Open email client
+    window.location.href = mailtoLink;
+
+    // Show success message
+    toast({
+      title: "Opening your email client...",
+      description: "Please send the pre-filled email to complete your inquiry.",
+    });
+
+    // Reset form after a short delay
+    setTimeout(() => {
       e.currentTarget.reset();
-    } catch (error) {
-      console.error("Contact form error:", error);
-      toast({
-        title: "Failed to send message",
-        description: "Please try again or contact us directly via phone or email.",
-        variant: "destructive",
-      });
-    } finally {
       setIsSubmitting(false);
-    }
+    }, 1000);
   }
 
   return (

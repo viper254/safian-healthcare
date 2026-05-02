@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 
-export async function POST(request: Request) {
+async function handleSignOut(request: Request) {
   if (supabaseIsConfigured()) {
     try {
       const supabase = await createSupabaseServerClient();
@@ -12,4 +12,12 @@ export async function POST(request: Request) {
   }
   const url = new URL(request.url);
   return NextResponse.redirect(new URL("/", url.origin));
+}
+
+export async function POST(request: Request) {
+  return handleSignOut(request);
+}
+
+export async function GET(request: Request) {
+  return handleSignOut(request);
 }

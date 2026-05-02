@@ -137,6 +137,19 @@ export async function POST(request: Request) {
       throw itemsErr;
     }
 
+    // Reduce stock for each product
+    for (const line of body.lines) {
+      const { error: stockErr } = await supabase.rpc('reduce_product_stock', {
+        product_id_param: line.product_id,
+        quantity_param: line.quantity
+      });
+      
+      if (stockErr) {
+        console.error(`Stock reduction error for product ${line.product_id}:`, stockErr);
+        // Continue even if stock reduction fails - order is already created
+      }
+    }
+
     // Log analytics event
     const { error: analyticsErr } = await supabase.from("analytics_events").insert({
       event_type: "order_placed",

@@ -92,7 +92,18 @@ export async function getProducts(opts?: {
 
     if (opts?.categorySlug) {
       const cat = cats.find((c) => c.slug === opts.categorySlug);
-      if (cat) query = query.eq("category_id", cat.id);
+      if (cat) {
+        // Check both primary category AND product_categories junction table
+        const { data: productIds } = await supabase
+          .from("product_categories")
+          .select("product_id")
+          .eq("category_id", cat.id);
+        
+        const idsFromJunction = productIds?.map(p => p.product_id) || [];
+        
+        // Get products that match either primary category OR are in junction table
+        query = query.or(`category_id.eq.${cat.id},id.in.(${idsFromJunction.join(',')})`);
+      }
     }
 
     if (opts?.featured) {

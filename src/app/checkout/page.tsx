@@ -169,6 +169,24 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Format phone number to match validation (0XXXXXXXXX)
+    let formattedPhone = phone.trim().replace(/\s+/g, ''); // Remove spaces
+    
+    // Convert +254XXXXXXXXX to 0XXXXXXXXX
+    if (formattedPhone.startsWith('+254')) {
+      formattedPhone = '0' + formattedPhone.slice(4);
+    } else if (formattedPhone.startsWith('254')) {
+      formattedPhone = '0' + formattedPhone.slice(3);
+    } else if (!formattedPhone.startsWith('0')) {
+      formattedPhone = '0' + formattedPhone;
+    }
+    
+    // Validate phone format
+    if (!/^0\d{9}$/.test(formattedPhone)) {
+      setError("Phone number must be 10 digits starting with 0 (e.g., 0712345678)");
+      return;
+    }
+
     setLoading(true);
     setError("");
     
@@ -179,7 +197,7 @@ export default function CheckoutPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: name.trim(),
-          phone: phone.trim(),
+          phone: formattedPhone,
           city: city.trim(),
           lines,
           subtotal: sub,
@@ -205,7 +223,15 @@ export default function CheckoutPage() {
         }
         
         if (response.status === 400) {
-          const errorMsg = data.error || data.details?.[0]?.message || "Please check your order details and try again";
+          // Show detailed validation errors
+          if (data.details && Array.isArray(data.details)) {
+            const errorMessages = data.details.map((issue: any) => {
+              const field = issue.path?.join('.') || 'field';
+              return `${field}: ${issue.message}`;
+            }).join(', ');
+            throw new Error(`Validation error: ${errorMessages}`);
+          }
+          const errorMsg = data.error || "Please check your order details and try again";
           throw new Error(errorMsg);
         }
         

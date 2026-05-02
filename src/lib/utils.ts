@@ -19,6 +19,7 @@ export function formatDate(value: string | Date | null | undefined): string {
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleDateString("en-KE", {
+    timeZone: "Africa/Nairobi",
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -30,6 +31,7 @@ export function formatDateTime(value: string | Date | null | undefined): string 
   const d = typeof value === "string" ? new Date(value) : value;
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleString("en-KE", {
+    timeZone: "Africa/Nairobi",
     year: "numeric",
     month: "short",
     day: "numeric",

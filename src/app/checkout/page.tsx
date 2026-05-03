@@ -215,6 +215,10 @@ export default function CheckoutPage() {
         console.error("Order creation failed:", data);
         
         // Handle specific error cases with helpful messages
+        if (response.status === 429) {
+          throw new Error(data.error || "Too many orders. Please try again later or contact support.");
+        }
+        
         if (response.status === 401 || response.status === 403) {
           setError("Authentication required. Please sign in or create an account to place orders.");
           setLoading(false);

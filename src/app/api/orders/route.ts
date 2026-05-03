@@ -90,6 +90,25 @@ export async function POST(request: Request) {
     const supabase = await createSupabaseServerClient();
     const { data: authUser } = await supabase.auth.getUser();
     
+    // Check phone number rate limit (prevent spam orders from same phone)
+    if (body.phone) {
+      const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+      const { data: recentOrders, error: checkError } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("customer_phone", body.phone)
+        .gte("created_at", oneHourAgo);
+      
+      if (checkError) {
+        console.error("Rate limit check error:", checkError);
+      } else if (recentOrders && recentOrders.length >= 3) {
+        return NextResponse.json(
+          { error: "Too many orders from this phone number. Please try again later or contact support at 0756 597 813." },
+          { status: 429 }
+        );
+      }
+    }
+    
     // For WhatsApp orders, use placeholder data if not provided
     const { data: order, error: orderErr } = await supabase
       .from("orders")

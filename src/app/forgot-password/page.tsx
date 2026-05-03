@@ -127,6 +127,13 @@ export default function ForgotPasswordPage() {
             Back to Sign In
           </Link>
         </div>
+
+        <div className="mt-6 pt-6 border-t text-center">
+          <p className="text-xs text-muted-foreground mb-2">Need help?</p>
+          <a href="tel:+254756597813" className="text-sm font-medium text-primary hover:underline">
+            Call/WhatsApp: 0756 597 813
+          </a>
+        </div>
       </div>
     </div>
   );

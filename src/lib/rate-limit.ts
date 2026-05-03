@@ -72,6 +72,7 @@ export function getClientIdentifier(request: Request): string {
  */
 export const RATE_LIMITS = {
   orders: { interval: 60 * 1000, maxRequests: 10 }, // 10 orders per minute (increased for scale)
+  ordersPerPhone: { interval: 60 * 60 * 1000, maxRequests: 3 }, // 3 orders per hour per phone number
   analytics: { interval: 60 * 1000, maxRequests: 100 }, // 100 events per minute
   auth: { interval: 15 * 60 * 1000, maxRequests: 5 }, // 5 attempts per 15 minutes
   api: { interval: 60 * 1000, maxRequests: 60 }, // 60 requests per minute (general)

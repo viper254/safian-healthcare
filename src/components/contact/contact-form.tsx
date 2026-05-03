@@ -66,6 +66,7 @@ ${message}
             id="name"
             name="name"
             autoComplete="name"
+            placeholder="John Doe"
             required
             disabled={isSubmitting}
           />
@@ -76,7 +77,7 @@ ${message}
             id="org"
             name="org"
             autoComplete="organization"
-            placeholder="Optional"
+            placeholder="Company Name (Optional)"
             disabled={isSubmitting}
           />
         </div>
@@ -87,6 +88,7 @@ ${message}
             name="email"
             type="email"
             autoComplete="email"
+            placeholder="john@example.com"
             required
             disabled={isSubmitting}
           />
@@ -98,6 +100,7 @@ ${message}
             name="phone"
             type="tel"
             autoComplete="tel"
+            placeholder="0712345678"
             required
             disabled={isSubmitting}
           />
@@ -109,6 +112,7 @@ ${message}
           id="subject"
           name="subject"
           autoComplete="off"
+          placeholder="What can we help you with?"
           required
           disabled={isSubmitting}
         />
@@ -120,6 +124,7 @@ ${message}
           name="message"
           rows={6}
           autoComplete="off"
+          placeholder="Tell us more about your inquiry..."
           required
           disabled={isSubmitting}
         />

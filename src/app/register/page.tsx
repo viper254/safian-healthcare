@@ -80,14 +80,14 @@ export default function RegisterPage() {
               <Label htmlFor="full_name">Full name</Label>
               <div className="relative">
                 <UserRound className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input id="full_name" name="full_name" required className="pl-9" />
+                <Input id="full_name" name="full_name" required className="pl-9" placeholder="John Doe" />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <div className="relative">
                 <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input id="phone" name="phone" type="tel" required className="pl-9" />
+                <Input id="phone" name="phone" type="tel" required className="pl-9" placeholder="0712345678" />
               </div>
             </div>
           </div>
@@ -95,7 +95,7 @@ export default function RegisterPage() {
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input id="email" name="email" type="email" required className="pl-9" />
+              <Input id="email" name="email" type="email" required className="pl-9" placeholder="john@example.com" />
             </div>
           </div>
           <div className="space-y-2">

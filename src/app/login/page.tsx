@@ -72,7 +72,7 @@ function LoginForm() {
             <Label htmlFor="email">Email</Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <Input id="email" name="email" type="email" required className="pl-9" />
+              <Input id="email" name="email" type="email" required className="pl-9" placeholder="john@example.com" />
             </div>
           </div>
           <div className="space-y-2">
@@ -89,7 +89,8 @@ function LoginForm() {
                 name="password" 
                 type={showPassword ? "text" : "password"} 
                 required 
-                className="pl-9 pr-10" 
+                className="pl-9 pr-10"
+                placeholder="Enter your password"
               />
               <button
                 type="button"

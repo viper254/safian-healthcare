@@ -93,20 +93,27 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Failed to create product" }, { status: 500 });
     }
 
-    // Insert product-category relationships
+    // Insert product-category relationships (excluding primary category to avoid duplicates)
     if (body.category_ids && body.category_ids.length > 0) {
-      const categoryRelations = body.category_ids.map(categoryId => ({
-        product_id: data.id,
-        category_id: categoryId,
-      }));
+      // Filter out the primary category if it's in the additional categories
+      const additionalCategories = body.category_ids.filter(
+        categoryId => categoryId !== body.category_id
+      );
 
-      const { error: categoryError } = await supabase
-        .from("product_categories")
-        .insert(categoryRelations);
+      if (additionalCategories.length > 0) {
+        const categoryRelations = additionalCategories.map(categoryId => ({
+          product_id: data.id,
+          category_id: categoryId,
+        }));
 
-      if (categoryError) {
-        console.error("Error creating product-category relations:", categoryError);
-        // Don't fail the whole operation, just log the error
+        const { error: categoryError } = await supabase
+          .from("product_categories")
+          .insert(categoryRelations);
+
+        if (categoryError) {
+          console.error("Error creating product-category relations:", categoryError);
+          // Don't fail the whole operation, just log the error
+        }
       }
     }
 

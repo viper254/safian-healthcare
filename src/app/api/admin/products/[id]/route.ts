@@ -54,6 +54,38 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
+    // Update product-category relationships if provided
+    if (body.category_ids !== undefined) {
+      // First, delete existing relationships
+      await supabase
+        .from("product_categories")
+        .delete()
+        .eq("product_id", id);
+
+      // Then insert new ones (excluding primary category to avoid duplicates)
+      if (Array.isArray(body.category_ids) && body.category_ids.length > 0) {
+        const additionalCategories = body.category_ids.filter(
+          (categoryId: string) => categoryId !== body.category_id
+        );
+
+        if (additionalCategories.length > 0) {
+          const categoryRelations = additionalCategories.map((categoryId: string) => ({
+            product_id: id,
+            category_id: categoryId,
+          }));
+
+          const { error: categoryError } = await supabase
+            .from("product_categories")
+            .insert(categoryRelations);
+
+          if (categoryError) {
+            console.error("Error updating product-category relations:", categoryError);
+            // Don't fail the whole operation, just log the error
+          }
+        }
+      }
+    }
+
     return NextResponse.json(data);
   } catch (error) {
     console.error("Error in PATCH /api/admin/products/[id]:", error);

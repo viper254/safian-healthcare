@@ -21,7 +21,7 @@ BEGIN
   VALUES (
     'order',
     'New order received',
-    'Order #' || NEW.order_number || ' - KES ' || NEW.total_amount,
+    'Order #' || NEW.reference || ' - KES ' || NEW.total,
     '/admin/orders'
   );
   RETURN NEW;

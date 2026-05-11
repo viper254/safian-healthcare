@@ -160,7 +160,7 @@ export function ProductForm({ productId }: { productId?: string }) {
         low_stock_threshold: parseInt(formData.low_stock_threshold),
         is_featured: formData.is_featured,
         is_active: formData.is_active,
-        category_ids: selectedCategories, // Add selected categories
+        category_ids: selectedCategories, // Additional categories
       };
 
       // Create product via API

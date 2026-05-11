@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Search, Menu, X, LayoutDashboard, Package, Tag, ShoppingBag, Users, Settings, Star, ArrowUpRight } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Logo } from "@/components/brand/logo";
 import { NotificationsDropdown } from "./notifications-dropdown";
 import { cn } from "@/lib/utils";
 import { SignOutButton } from "@/components/auth/signout-button";
+import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 
 const mobileItems = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
@@ -43,7 +44,79 @@ export function AdminTopbar({
   unreadCount = 0 
 }: AdminTopbarProps) {
   const [open, setOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
+  const router = useRouter();
+
+  // Search function
+  async function handleSearch(query: string) {
+    setSearchQuery(query);
+    
+    if (query.trim().length < 2) {
+      setSearchResults([]);
+      setShowResults(false);
+      return;
+    }
+
+    setSearching(true);
+    setShowResults(true);
+
+    try {
+      const supabase = createSupabaseBrowserClient();
+      const searchTerm = `%${query.trim()}%`;
+
+      // Search products
+      const { data: products } = await supabase
+        .from("products")
+        .select("id, name, slug, sku")
+        .or(`name.ilike.${searchTerm},sku.ilike.${searchTerm}`)
+        .limit(5);
+
+      // Search orders
+      const { data: orders } = await supabase
+        .from("orders")
+        .select("id, reference, customer_name")
+        .or(`reference.ilike.${searchTerm},customer_name.ilike.${searchTerm}`)
+        .limit(5);
+
+      const results = [
+        ...(products || []).map(p => ({ type: 'product', ...p })),
+        ...(orders || []).map(o => ({ type: 'order', ...o })),
+      ];
+
+      setSearchResults(results);
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Navigate to result
+  function navigateToResult(result: any) {
+    if (result.type === 'product') {
+      router.push(`/admin/products/${result.id}`);
+    } else if (result.type === 'order') {
+      router.push(`/admin/orders`);
+    }
+    setShowResults(false);
+    setSearchQuery("");
+  }
 
   // Close drawer on route change
   useEffect(() => {
@@ -87,13 +160,61 @@ export function AdminTopbar({
           <h1 className="font-display font-bold text-base sm:text-lg md:text-xl truncate">{title}</h1>
           {subtitle && <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{subtitle}</p>}
         </div>
-        <div className="relative hidden md:block">
+        <div className="relative hidden md:block" ref={searchRef}>
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder="Search admin\u2026"
+            placeholder="Search products, orders..."
+            value={searchQuery}
+            onChange={(e) => handleSearch(e.target.value)}
+            onFocus={() => searchQuery.length >= 2 && setShowResults(true)}
             className="h-10 w-64 rounded-full border border-input bg-background pl-9 pr-4 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
+          
+          {/* Search results dropdown */}
+          {showResults && (
+            <div className="absolute top-full mt-2 w-full bg-card border rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+              {searching ? (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  Searching...
+                </div>
+              ) : searchResults.length > 0 ? (
+                <div className="py-2">
+                  {searchResults.map((result, index) => (
+                    <button
+                      key={`${result.type}-${result.id}`}
+                      onClick={() => navigateToResult(result)}
+                      className="w-full px-4 py-2 text-left hover:bg-accent transition-colors flex items-center gap-3"
+                    >
+                      {result.type === 'product' ? (
+                        <>
+                          <Package className="size-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{result.name}</p>
+                            {result.sku && (
+                              <p className="text-xs text-muted-foreground">SKU: {result.sku}</p>
+                            )}
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <ShoppingBag className="size-4 text-muted-foreground shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium truncate">{result.reference}</p>
+                            <p className="text-xs text-muted-foreground truncate">{result.customer_name}</p>
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="p-4 text-center text-sm text-muted-foreground">
+                  No results found
+                </div>
+              )}
+            </div>
+          )}
         </div>
         
         <NotificationsDropdown 

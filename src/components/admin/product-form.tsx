@@ -173,6 +173,14 @@ export function ProductForm({ productId }: { productId?: string }) {
       const result = await response.json();
 
       if (!response.ok) {
+        // Show detailed validation errors if available
+        if (result.details && Array.isArray(result.details)) {
+          const errorMessages = result.details.map((issue: any) => {
+            const field = issue.path?.join('.') || 'field';
+            return `${field}: ${issue.message}`;
+          }).join(', ');
+          throw new Error(`Validation failed: ${errorMessages}`);
+        }
         throw new Error(result.error || "Failed to create product");
       }
 

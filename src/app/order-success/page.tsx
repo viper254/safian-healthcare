@@ -29,19 +29,19 @@ export default async function OrderSuccessPage({
           <p className="font-bold text-xl">{reference}</p>
         </div>
 
-        {/* Till Number Display */}
+        {/* Paybill Number Display */}
         <div className="mt-6 p-6 rounded-xl bg-brand-green-50 dark:bg-brand-green-950/20 border-2 border-brand-green-500">
           <h2 className="font-bold text-xl mb-4 text-brand-green-700 dark:text-brand-green-300 text-center">
-            Pay to M-PESA Till Number
+            Pay to M-PESA Paybill Number
           </h2>
           
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 border-2 border-brand-green-500 mb-6">
-            <p className="text-xs text-muted-foreground mb-2 text-center">Buy Goods Till Number</p>
+            <p className="text-xs text-muted-foreground mb-2 text-center">Paybill Number</p>
             <p className="text-4xl font-bold text-brand-green-600 dark:text-brand-green-400 tracking-wider text-center">
-              {COMPANY_CONTACT.tillNumber}
+              {COMPANY_CONTACT.paybillNumber}
             </p>
             <p className="text-sm text-muted-foreground mt-2 text-center font-medium">
-              SAFIAN SUPPLIES
+              Account: {COMPANY_CONTACT.accountName}
             </p>
           </div>
 
@@ -64,64 +64,30 @@ export default async function OrderSuccessPage({
                 </li>
                 <li className="flex gap-2">
                   <span className="font-semibold text-foreground shrink-0">3.</span>
-                  <span>Select <strong className="text-foreground">Buy Goods and Services</strong></span>
+                  <span>Select <strong className="text-foreground">Pay Bill</strong></span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-semibold text-foreground shrink-0">4.</span>
-                  <span>Enter Till Number: <strong className="text-brand-green-600">{COMPANY_CONTACT.tillNumber}</strong></span>
+                  <span>Enter Business Number: <strong className="text-brand-green-600">{COMPANY_CONTACT.paybillNumber}</strong></span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-semibold text-foreground shrink-0">5.</span>
-                  <span>Enter the Amount</span>
+                  <span>Enter Account Number: <strong className="text-brand-green-600">Your Name/Order Number</strong></span>
                 </li>
                 <li className="flex gap-2">
                   <span className="font-semibold text-foreground shrink-0">6.</span>
+                  <span>Enter the Amount</span>
+                </li>
+                <li className="flex gap-2">
+                  <span className="font-semibold text-foreground shrink-0">7.</span>
                   <span>Enter your M-PESA PIN</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">7.</span>
-                  <span>Confirm all details (ensure merchant name is <strong className="text-foreground">SAFIAN SUPPLIES</strong>) and press OK</span>
-                </li>
-                <li className="flex gap-2">
                   <span className="font-semibold text-foreground shrink-0">8.</span>
-                  <span>You will receive a confirmation message</span>
-                </li>
-              </ol>
-            </div>
-
-            {/* Airtel Money */}
-            <div className="bg-white dark:bg-background rounded-lg p-4 border">
-              <div className="flex items-center gap-2 mb-3">
-                <CreditCard className="size-5 text-red-600" />
-                <h3 className="font-bold text-base">Using Airtel Money</h3>
-              </div>
-              <ol className="space-y-2 text-sm text-muted-foreground">
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">1.</span>
-                  <span>Dial <strong className="text-foreground">*334#</strong></span>
+                  <span>Confirm all details and press OK</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">2.</span>
-                  <span>Select <strong className="text-foreground">Buy Goods & Services</strong></span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">3.</span>
-                  <span>Select <strong className="text-foreground">Use M-PESA Till Number</strong> (Airtel supports payments to M-PESA tills)</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">4.</span>
-                  <span>Enter Till Number: <strong className="text-brand-green-600">{COMPANY_CONTACT.tillNumber}</strong></span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">5.</span>
-                  <span>Enter the Amount</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">6.</span>
-                  <span>Enter your Airtel Money PIN to confirm</span>
-                </li>
-                <li className="flex gap-2">
-                  <span className="font-semibold text-foreground shrink-0">7.</span>
+                  <span className="font-semibold text-foreground shrink-0">9.</span>
                   <span>You will receive a confirmation message</span>
                 </li>
               </ol>

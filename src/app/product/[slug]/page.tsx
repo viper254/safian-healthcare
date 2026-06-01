@@ -195,7 +195,7 @@ export default async function ProductPage(context: {
             )}
           </div>
 
-          <p className="mt-5 text-[15px] text-foreground/90 leading-relaxed">
+          <p className="mt-5 text-[15px] text-foreground/90 leading-relaxed whitespace-pre-wrap">
             {product.description}
           </p>
 

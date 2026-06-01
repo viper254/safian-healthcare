@@ -9,7 +9,8 @@ export const COMPANY_CONTACT = {
   email: "safianmedicalsupplies@gmail.com",
   whatsapp: "254756597813", // Format for WhatsApp API (no + or spaces)
   whatsappDisplay: "+254 756 597 813",
-  tillNumber: "5517358", // M-Pesa Till Number
+  paybillNumber: "4052767", // M-Pesa Paybill Number
+  accountName: "CLIENT NAME/ORDER NUMBER", // Account name format for paybill
   address: "Platinum Plaza, Nairobi CBD",
 };
 

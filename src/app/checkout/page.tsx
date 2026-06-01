@@ -315,7 +315,7 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
     <div className="container py-8 md:py-12">
       <h1 className="font-display font-bold text-3xl">Checkout</h1>
       <p className="text-sm text-muted-foreground mt-1">
-        Pay via M-Pesa Till Number {COMPANY_CONTACT.tillNumber} and confirm via WhatsApp.
+        Pay via M-Pesa Paybill Number {COMPANY_CONTACT.paybillNumber} and confirm via WhatsApp.
       </p>
       
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
@@ -337,36 +337,36 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
             </div>
           )}
 
-          {/* Till Number Payment Section */}
+          {/* Paybill Number Payment Section */}
           <section className="rounded-2xl border-2 border-brand-green-500/30 bg-gradient-to-br from-brand-green-50 to-white dark:from-brand-green-950/20 dark:to-background p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="size-12 rounded-full bg-brand-green-500 flex items-center justify-center shrink-0">
                 <Smartphone className="size-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg">Pay via M-Pesa Till</h2>
+                <h2 className="font-semibold text-lg">Pay via M-Pesa Paybill</h2>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Enter your details below, then pay to our M-Pesa Till Number and send confirmation via WhatsApp.
+                  Enter your details below, then pay to our M-Pesa Paybill Number and send confirmation via WhatsApp.
                 </p>
                 
-                {/* Till Number Display */}
+                {/* Paybill Number Display */}
                 <div className="mb-4 p-4 rounded-lg bg-white dark:bg-background border-2 border-brand-green-500">
-                  <p className="text-xs text-muted-foreground mb-1">M-Pesa Till Number</p>
+                  <p className="text-xs text-muted-foreground mb-1">M-Pesa Paybill Number</p>
                   <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-brand-green-600">{COMPANY_CONTACT.tillNumber}</p>
+                    <p className="text-2xl font-bold text-brand-green-600">{COMPANY_CONTACT.paybillNumber}</p>
                     <Button
                       type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        navigator.clipboard.writeText(COMPANY_CONTACT.tillNumber);
+                        navigator.clipboard.writeText(COMPANY_CONTACT.paybillNumber);
                       }}
                     >
                       Copy
                     </Button>
                   </div>
                   <p className="text-xs text-muted-foreground mt-2">
-                    SAFIAN SUPPLIES
+                    Account Name: {COMPANY_CONTACT.accountName}
                   </p>
                 </div>
                 
@@ -441,9 +441,9 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                   <h3 className="font-bold text-lg mb-2">Lipa na M-PESA</h3>
                   <div className="space-y-3 text-sm">
                     <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border-2 border-brand-green-500">
-                      <p className="text-xs text-muted-foreground mb-1">Buy Goods Till Number</p>
-                      <p className="text-2xl font-bold text-brand-green-600 dark:text-brand-green-400 tracking-wider">5517358</p>
-                      <p className="text-xs text-muted-foreground mt-1">SAFIAN SUPPLIES</p>
+                      <p className="text-xs text-muted-foreground mb-1">Paybill Number</p>
+                      <p className="text-2xl font-bold text-brand-green-600 dark:text-brand-green-400 tracking-wider">4052767</p>
+                      <p className="text-xs text-muted-foreground mt-1">Account: CLIENT NAME/ORDER NUMBER</p>
                     </div>
                     <div className="space-y-2">
                       <p className="font-semibold text-brand-green-700 dark:text-brand-green-300">Payment Instructions:</p>
@@ -458,22 +458,26 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                         </li>
                         <li className="flex gap-2">
                           <span className="font-bold text-brand-green-600 dark:text-brand-green-400">3.</span>
-                          <span>Select <strong>Buy Goods and Services</strong></span>
+                          <span>Select <strong>Pay Bill</strong></span>
                         </li>
                         <li className="flex gap-2">
                           <span className="font-bold text-brand-green-600 dark:text-brand-green-400">4.</span>
-                          <span>Enter Till Number: <strong className="text-brand-green-600 dark:text-brand-green-400">5517358</strong></span>
+                          <span>Enter Business Number: <strong className="text-brand-green-600 dark:text-brand-green-400">4052767</strong></span>
                         </li>
                         <li className="flex gap-2">
                           <span className="font-bold text-brand-green-600 dark:text-brand-green-400">5.</span>
-                          <span>Enter amount: <strong className="text-brand-green-600 dark:text-brand-green-400">{formatKES(total)}</strong></span>
+                          <span>Enter Account Number: <strong className="text-brand-green-600 dark:text-brand-green-400">Your Name/Order Number</strong></span>
                         </li>
                         <li className="flex gap-2">
                           <span className="font-bold text-brand-green-600 dark:text-brand-green-400">6.</span>
-                          <span>Enter your M-PESA PIN and confirm</span>
+                          <span>Enter amount: <strong className="text-brand-green-600 dark:text-brand-green-400">{formatKES(total)}</strong></span>
                         </li>
                         <li className="flex gap-2">
                           <span className="font-bold text-brand-green-600 dark:text-brand-green-400">7.</span>
+                          <span>Enter your M-PESA PIN and confirm</span>
+                        </li>
+                        <li className="flex gap-2">
+                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">8.</span>
                           <span>You will receive a confirmation SMS</span>
                         </li>
                       </ol>

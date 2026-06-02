@@ -441,6 +441,17 @@ export function ProductEditForm({ product }: { product: Product }) {
                 <Input id="discounted_price" name="discounted_price" type="number" step="0.01" value={formData.discounted_price} onChange={handleChange} />
               </div>
               <div className="space-y-2">
+                <Label htmlFor="offer_price">Offer Price (KES)</Label>
+                <Input id="offer_price" name="offer_price" type="number" step="0.01" value={formData.offer_price} onChange={handleChange} />
+                <p className="text-xs text-muted-foreground">
+                  Special offer price - overrides discounted price if set
+                </p>
+              </div>
+              <div className="p-3 rounded-lg bg-muted/40 border">
+                <p className="text-xs font-medium mb-1">Price Priority:</p>
+                <p className="text-xs text-muted-foreground">Offer Price → Discounted Price → Original Price</p>
+              </div>
+              <div className="space-y-2">
                 <Label htmlFor="stock_quantity">Stock Quantity *</Label>
                 <Input id="stock_quantity" name="stock_quantity" type="number" required value={formData.stock_quantity} onChange={handleChange} />
               </div>

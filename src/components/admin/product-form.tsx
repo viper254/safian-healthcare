@@ -398,19 +398,26 @@ export function ProductForm({ productId }: { productId?: string }) {
         </div>
 
         {/* Offer Price */}
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <Label htmlFor="offer_price">Offer Price (KES)</Label>
-            <Input
-              id="offer_price"
-              name="offer_price"
-              type="number"
-              step="0.01"
-              value={formData.offer_price}
-              onChange={handleChange}
-              placeholder="Special offer price"
-            />
-          </div>
+        <div>
+          <Label htmlFor="offer_price">Offer Price (KES)</Label>
+          <Input
+            id="offer_price"
+            name="offer_price"
+            type="number"
+            step="0.01"
+            value={formData.offer_price}
+            onChange={handleChange}
+            placeholder="Special offer price"
+          />
+          <p className="text-xs text-muted-foreground mt-1">
+            Special offer price - overrides discounted price if set
+          </p>
+        </div>
+
+        {/* Price Priority Note */}
+        <div className="p-3 rounded-lg bg-muted/40 border">
+          <p className="text-xs font-medium mb-1">Price Priority:</p>
+          <p className="text-xs text-muted-foreground">Offer Price → Discounted Price → Original Price</p>
         </div>
 
         {/* Stock */}

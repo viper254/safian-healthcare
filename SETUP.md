@@ -20,7 +20,7 @@ npm install
 
 ### 3. Run Database Migrations
 
-Go to your Supabase Dashboard → SQL Editor and run `run-all-migrations.sql`
+Go to your Supabase Dashboard → SQL Editor and run `run-all-migrations.sql`, then run `supabase/migrations/015_mpesa_transactions.sql` if the roll-up is from an older checkout. The new migration creates the server-managed M-Pesa transaction table and its customer/admin read policy.
 
 ### 4. Start Development Server
 
@@ -45,6 +45,7 @@ All migrations are in `supabase/migrations/` folder. To apply them:
 - **001-010**: Initial schema, categories, products, orders, reviews, analytics
 - **011**: Updates payment method from "whatsapp" to "till" (M-Pesa Till Number: 5517358)
 - **012**: Adds DELETE policies for admin to reset orders
+- **015**: Adds `mpesa_transactions` for Daraja STK Push tracking and callback verification
 
 ## Admin Features
 
@@ -74,9 +75,11 @@ This feature allows admins to permanently delete all orders and order-related an
 ## Key Features
 
 ### Payment System
-- M-Pesa Till Number: **5517358** (SAFIAN SUPPLIES)
-- Payment instructions for Safaricom M-PESA and Airtel Money
-- WhatsApp order confirmation
+Automated checkout uses Safaricom Daraja STK Push. The customer submits an authenticated checkout, the server validates current product prices and stock, creates the order, and sends a payment prompt to the Kenyan phone number. Daraja calls `/api/payments/mpesa/callback` after the customer responds; the server verifies the stored CheckoutRequestID, amount, phone number, and receipt before setting `orders.payment_status` to `paid`. The order-success page polls `/api/payments/mpesa/status` for up to two minutes.
+
+Add the following server-only values to `.env` or the hosting provider’s environment settings: `SUPABASE_SERVICE_ROLE_KEY`, `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY`, `MPESA_ENVIRONMENT=sandbox`, `MPESA_TRANSACTION_TYPE=CustomerPayBillOnline`, and a public HTTPS `MPESA_CALLBACK_URL`. In sandbox, create a Daraja app and use the credentials and test shortcode/passkey issued by the portal. In production, switch to `MPESA_ENVIRONMENT=production` and use the live credentials issued for the merchant’s shortcode. Never expose the consumer secret, passkey, or service-role key as `NEXT_PUBLIC_*` variables.
+
+The existing manual Till/Paybill and WhatsApp path remains available from checkout as a fallback. Confirm the business’s actual Paybill/Till number before publishing manual-payment instructions, because the repository’s historical documentation contains conflicting legacy numbers.
 
 ### Product Management
 - Multiple categories per product
@@ -121,6 +124,14 @@ NEXT_PUBLIC_SUPABASE_URL=your_production_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_key
 NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ADMIN_RESET_PASSWORD=YourSecurePassword123
+SUPABASE_SERVICE_ROLE_KEY=your_server_only_service_role_key
+MPESA_ENVIRONMENT=production
+MPESA_CONSUMER_KEY=your_live_consumer_key
+MPESA_CONSUMER_SECRET=your_live_consumer_secret
+MPESA_SHORTCODE=your_live_shortcode
+MPESA_PASSKEY=your_live_passkey
+MPESA_CALLBACK_URL=https://yourdomain.com/api/payments/mpesa/callback
+MPESA_TRANSACTION_TYPE=CustomerPayBillOnline
 ```
 
 ## Troubleshooting

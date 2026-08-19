@@ -1,15 +1,17 @@
 import Link from "next/link";
-import { CheckCircle2, MessageCircle, Package, Smartphone, CreditCard } from "lucide-react";
+import { CheckCircle2, MessageCircle, Package, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { COMPANY_CONTACT } from "@/lib/constants";
+import { MpesaPaymentStatus } from "@/components/orders/mpesa-payment-status";
 
 export default async function OrderSuccessPage({
   searchParams,
 }: {
-  searchParams: Promise<{ ref?: string }>;
-}) {
+    searchParams: Promise<{ ref?: string; payment?: string }>;
+  }) {
   const params = await searchParams;
   const reference = params.ref || "N/A";
+  const paymentMode = params.payment === "mpesa" ? "mpesa" : "manual";
 
   return (
     <div className="container py-12 max-w-3xl">
@@ -18,10 +20,14 @@ export default async function OrderSuccessPage({
           <CheckCircle2 className="size-10" />
         </div>
         
-        <h1 className="mt-6 font-display font-bold text-3xl text-center">Order Created!</h1>
+        <h1 className="mt-6 font-display font-bold text-3xl text-center">
+          {paymentMode === "mpesa" ? "Complete your M-Pesa payment" : "Order Created!"}
+        </h1>
         
         <p className="mt-2 text-muted-foreground text-center">
-          Your order has been saved. Please complete payment via M-PESA to confirm your order.
+          {paymentMode === "mpesa"
+            ? "Check your phone for the M-Pesa prompt and enter your PIN. We will update this page when the payment is confirmed."
+            : "Your order has been saved. Please complete payment via M-PESA to confirm your order."}
         </p>
         
         <div className="mt-6 rounded-xl bg-muted p-4 text-center">
@@ -29,8 +35,9 @@ export default async function OrderSuccessPage({
           <p className="font-bold text-xl">{reference}</p>
         </div>
 
-        {/* Paybill Number Display */}
-        <div className="mt-6 p-6 rounded-xl bg-brand-green-50 dark:bg-brand-green-950/20 border-2 border-brand-green-500">
+        {paymentMode === "mpesa" && <MpesaPaymentStatus reference={reference} />}
+
+        {paymentMode === "manual" && <div className="mt-6 p-6 rounded-xl bg-brand-green-50 dark:bg-brand-green-950/20 border-2 border-brand-green-500">
           <h2 className="font-bold text-xl mb-4 text-brand-green-700 dark:text-brand-green-300 text-center">
             Pay to M-PESA Paybill Number
           </h2>
@@ -93,8 +100,9 @@ export default async function OrderSuccessPage({
               </ol>
             </div>
           </div>
-        </div>
+        </div>}
 
+        {paymentMode === "manual" && <>
         {/* WhatsApp Confirmation */}
         <div className="mt-6 p-4 rounded-lg bg-[#25D366]/10 border-2 border-[#25D366]">
           <div className="flex items-start gap-3">
@@ -109,6 +117,7 @@ export default async function OrderSuccessPage({
             </div>
           </div>
         </div>
+        </>}
 
         <div className="mt-8 flex gap-3 justify-center flex-wrap">
           <Button asChild variant="gradient">

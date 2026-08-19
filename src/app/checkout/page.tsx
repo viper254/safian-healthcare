@@ -5,49 +5,14 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import {
-  CreditCard,
-  Smartphone,
-  Banknote,
-  Building,
-  ShieldCheck,
-  CheckCircle2,
-  MessageCircle,
-  Clock,
-  UserPlus,
-  Info,
-} from "lucide-react";
+import { Smartphone, MessageCircle, UserPlus } from "lucide-react";
 import { useCart } from "@/store/cart-store";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { formatKES } from "@/lib/utils";
-import { DELIVERY_FEES, FREE_DELIVERY_OVER_KES, COMPANY_CONTACT, MAJOR_TOWNS } from "@/lib/constants";
-import type { PaymentMethod } from "@/types";
-
-const methods: { id: PaymentMethod; label: string; icon: typeof CreditCard; desc: string; available: boolean }[] = [
-  { id: "mpesa", label: "M-Pesa", icon: Smartphone, desc: "Coming soon", available: false },
-  { id: "card", label: "Card", icon: CreditCard, desc: "Coming soon", available: false },
-  { id: "bank_transfer", label: "Bank transfer", icon: Building, desc: "Coming soon", available: false },
-  { id: "cash_on_delivery", label: "Cash on delivery", icon: Banknote, desc: "Coming soon", available: false },
-];
-
-function calculateDeliveryFee(city: string, subtotal: number): number {
-  if (subtotal >= FREE_DELIVERY_OVER_KES) return 0;
-  
-  const cityLower = city.toLowerCase().trim();
-  
-  if (cityLower.includes("nairobi")) {
-    return DELIVERY_FEES.NAIROBI;
-  }
-  
-  if (MAJOR_TOWNS.some(town => cityLower.includes(town.toLowerCase()))) {
-    return DELIVERY_FEES.MAJOR_TOWNS;
-  }
-  
-  return DELIVERY_FEES.DEFAULT;
-}
+import { FREE_DELIVERY_OVER_KES, COMPANY_CONTACT } from "@/lib/constants";
+import { calculateDeliveryFee, normalizeKenyanPhone } from "@/lib/checkout";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -163,26 +128,60 @@ export default function CheckoutPage() {
     );
   }
 
+  async function handleMpesaPayment() {
+    if (!name.trim() || !phone.trim() || !city.trim()) {
+      setError("Please enter your name, phone number, and city");
+      return;
+    }
+
+    const normalizedPhone = normalizeKenyanPhone(phone);
+    if (!normalizedPhone) {
+      setError("Phone number must be 10 digits starting with 0 (e.g., 0712345678)");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("/api/payments/mpesa/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          phone: normalizedPhone.local,
+          city: city.trim(),
+          lines: lines.map((line) => ({
+            product_id: line.product_id,
+            quantity: line.quantity,
+          })),
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(data.error || "M-Pesa could not start the payment request.");
+      }
+      if (!data.reference) throw new Error("No order reference received.");
+
+      clear();
+      router.push(`/order-success?ref=${encodeURIComponent(data.reference)}&payment=mpesa`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "M-Pesa could not start the payment request. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   async function handleWhatsAppOrder() {
     if (!name.trim() || !phone.trim() || !city.trim()) {
       setError("Please enter your name, phone number, and city");
       return;
     }
 
-    // Format phone number to match validation (0XXXXXXXXX)
-    let formattedPhone = phone.trim().replace(/\s+/g, ''); // Remove spaces
-    
-    // Convert +254XXXXXXXXX to 0XXXXXXXXX
-    if (formattedPhone.startsWith('+254')) {
-      formattedPhone = '0' + formattedPhone.slice(4);
-    } else if (formattedPhone.startsWith('254')) {
-      formattedPhone = '0' + formattedPhone.slice(3);
-    } else if (!formattedPhone.startsWith('0')) {
-      formattedPhone = '0' + formattedPhone;
-    }
-    
-    // Validate phone format
-    if (!/^0\d{9}$/.test(formattedPhone)) {
+    const normalizedPhone = normalizeKenyanPhone(phone);
+    const formattedPhone = normalizedPhone?.local;
+    if (!formattedPhone) {
       setError("Phone number must be 10 digits starting with 0 (e.g., 0712345678)");
       return;
     }
@@ -229,9 +228,10 @@ export default function CheckoutPage() {
         if (response.status === 400) {
           // Show detailed validation errors
           if (data.details && Array.isArray(data.details)) {
-            const errorMessages = data.details.map((issue: any) => {
-              const field = issue.path?.join('.') || 'field';
-              return `${field}: ${issue.message}`;
+            const errorMessages = data.details.map((issue: { path?: unknown; message?: unknown }) => {
+              const field = Array.isArray(issue.path) ? issue.path.join('.') : 'field';
+              const message = typeof issue.message === 'string' ? issue.message : 'Invalid field';
+              return `${field}: ${message}`;
             }).join(', ');
             throw new Error(`Validation error: ${errorMessages}`);
           }
@@ -261,7 +261,7 @@ export default function CheckoutPage() {
 
 *Customer Details:*
 Name: ${name}
-Phone: ${phone}
+Phone: ${formattedPhone}
 City: ${city}
 
 *Order Items:*
@@ -283,23 +283,25 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
       window.open(whatsappUrl, "_blank");
       
       // Redirect to success page
-      router.push(`/order-success?ref=${orderReference}`);
-    } catch (err: any) {
+      router.push(`/order-success?ref=${encodeURIComponent(orderReference)}&payment=manual`);
+    } catch (err: unknown) {
       console.error("Order error:", err);
       
       // Provide user-friendly error messages
       let errorMessage = "";
+      const errorCode = err && typeof err === 'object' && 'code' in err ? (err as { code?: unknown }).code : undefined;
+      const errorMessageFromError = err instanceof Error ? err.message : "";
       
-      if (err.message) {
-        errorMessage = err.message;
-      } else if (err.code === 'PGRST116') {
+      if (errorMessageFromError) {
+        errorMessage = errorMessageFromError;
+      } else if (errorCode === 'PGRST116') {
         errorMessage = "One or more products are no longer available. Please check your cart.";
-      } else if (err.code === '23505') {
+      } else if (errorCode === '23505') {
         errorMessage = "This order already exists. Please refresh the page and try again.";
-      } else if (err.code === '42501') {
+      } else if (errorCode === '42501') {
         errorMessage = "Permission denied. Please sign in or create an account to place orders.";
         setIsAuthenticated(false); // Show auth banner
-      } else if (err.code === 'PGRST301') {
+      } else if (errorCode === 'PGRST301') {
         errorMessage = "Database connection error. Please try again in a moment.";
       } else {
         errorMessage = "Failed to create order. Please try again or contact us via WhatsApp at " + COMPANY_CONTACT.phoneFormatted;
@@ -315,7 +317,7 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
     <div className="container py-8 md:py-12">
       <h1 className="font-display font-bold text-3xl">Checkout</h1>
       <p className="text-sm text-muted-foreground mt-1">
-        Pay via M-Pesa Paybill Number {COMPANY_CONTACT.paybillNumber} and confirm via WhatsApp.
+        Pay securely with M-Pesa STK Push. You will receive a payment prompt on your phone.
       </p>
       
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
@@ -337,38 +339,17 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
             </div>
           )}
 
-          {/* Paybill Number Payment Section */}
+          {/* M-Pesa STK Push Payment Section */}
           <section className="rounded-2xl border-2 border-brand-green-500/30 bg-gradient-to-br from-brand-green-50 to-white dark:from-brand-green-950/20 dark:to-background p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="size-12 rounded-full bg-brand-green-500 flex items-center justify-center shrink-0">
                 <Smartphone className="size-6 text-white" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg">Pay via M-Pesa Paybill</h2>
+                <h2 className="font-semibold text-lg">Pay with M-Pesa</h2>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Enter your details below, then pay to our M-Pesa Paybill Number and send confirmation via WhatsApp.
+                  Enter your details below. We will send an STK Push prompt to your phone so you can complete payment securely with your M-Pesa PIN.
                 </p>
-                
-                {/* Paybill Number Display */}
-                <div className="mb-4 p-4 rounded-lg bg-white dark:bg-background border-2 border-brand-green-500">
-                  <p className="text-xs text-muted-foreground mb-1">M-Pesa Paybill Number</p>
-                  <div className="flex items-center justify-between">
-                    <p className="text-2xl font-bold text-brand-green-600">{COMPANY_CONTACT.paybillNumber}</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        navigator.clipboard.writeText(COMPANY_CONTACT.paybillNumber);
-                      }}
-                    >
-                      Copy
-                    </Button>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Account Name: {COMPANY_CONTACT.accountName}
-                  </p>
-                </div>
                 
                 <div className="space-y-3 mb-4">
                   <div>
@@ -408,95 +389,33 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                 </div>
                 
                 <Button
-                  onClick={handleWhatsAppOrder}
+                  onClick={handleMpesaPayment}
                   variant="default"
                   size="lg"
-                  className="bg-[#25D366] hover:bg-[#20BA5A] text-white"
+                  className="bg-brand-green-600 hover:bg-brand-green-700 text-white"
+                  disabled={loading}
+                >
+                  <Smartphone className="size-5" />
+                  {loading ? "Starting M-Pesa..." : "Pay with M-Pesa"}
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleWhatsAppOrder}
+                  variant="outline"
+                  size="lg"
+                  className="mt-3"
                   disabled={loading}
                 >
                   <MessageCircle className="size-5" />
-                  {loading ? "Creating order..." : "Send Order via WhatsApp"}
+                  Use manual WhatsApp payment instead
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
-                  After payment, send M-Pesa confirmation message via WhatsApp
+                  A secure payment prompt will appear on the phone number above.
                 </p>
               </div>
             </div>
           </section>
 
-          {/* Payment Methods - Coming Soon */}
-          <section className="rounded-2xl border bg-card p-6 shadow-sm">
-            <div className="flex items-center gap-2 mb-4">
-              <h2 className="font-semibold text-lg">Payment Method</h2>
-            </div>
-            <div className="rounded-xl border-2 border-brand-green-500 bg-brand-green-50 dark:bg-brand-green-950/20 p-6">
-              <div className="flex items-start gap-4">
-                <div className="size-12 rounded-xl bg-brand-green-500 text-white flex items-center justify-center shrink-0">
-                  <svg className="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="2" y="5" width="20" height="14" rx="2"/>
-                    <line x1="2" y1="10" x2="22" y2="10"/>
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-bold text-lg mb-2">Lipa na M-PESA</h3>
-                  <div className="space-y-3 text-sm">
-                    <div className="bg-white dark:bg-gray-900 rounded-lg p-4 border-2 border-brand-green-500">
-                      <p className="text-xs text-muted-foreground mb-1">Paybill Number</p>
-                      <p className="text-2xl font-bold text-brand-green-600 dark:text-brand-green-400 tracking-wider">4052767</p>
-                      <p className="text-xs text-muted-foreground mt-1">Account: CLIENT NAME/ORDER NUMBER</p>
-                    </div>
-                    <div className="space-y-2">
-                      <p className="font-semibold text-brand-green-700 dark:text-brand-green-300">Payment Instructions:</p>
-                      <ol className="space-y-1.5 text-sm">
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">1.</span>
-                          <span>Go to M-PESA menu on your phone</span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">2.</span>
-                          <span>Select <strong>Lipa na M-PESA</strong></span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">3.</span>
-                          <span>Select <strong>Pay Bill</strong></span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">4.</span>
-                          <span>Enter Business Number: <strong className="text-brand-green-600 dark:text-brand-green-400">4052767</strong></span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">5.</span>
-                          <span>Enter Account Number: <strong className="text-brand-green-600 dark:text-brand-green-400">Your Name/Order Number</strong></span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">6.</span>
-                          <span>Enter amount: <strong className="text-brand-green-600 dark:text-brand-green-400">{formatKES(total)}</strong></span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">7.</span>
-                          <span>Enter your M-PESA PIN and confirm</span>
-                        </li>
-                        <li className="flex gap-2">
-                          <span className="font-bold text-brand-green-600 dark:text-brand-green-400">8.</span>
-                          <span>You will receive a confirmation SMS</span>
-                        </li>
-                      </ol>
-                    </div>
-                    <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 mt-4">
-                      <p className="text-xs font-semibold text-blue-700 dark:text-blue-300 mb-1">After Payment:</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400">
-                        Send the M-PESA confirmation message to <strong>0756 597 813</strong> via WhatsApp or SMS with your order details.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <p className="mt-4 inline-flex items-center gap-2 text-xs text-muted-foreground">
-              <ShieldCheck className="size-4 text-brand-green-500" />
-              Secure M-PESA payment. Your order will be processed once payment is confirmed.
-            </p>
-          </section>
         </div>
 
         {/* Order Summary */}
@@ -552,17 +471,17 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
               </div>
             </dl>
             <Button
-              onClick={handleWhatsAppOrder}
+              onClick={handleMpesaPayment}
               variant="gradient"
               size="lg"
               className="w-full"
               disabled={loading}
             >
-              <MessageCircle className="size-5" />
-              {loading ? "Creating..." : `Complete Order · ${formatKES(total)}`}
+              <Smartphone className="size-5" />
+              {loading ? "Starting M-Pesa..." : `Pay with M-Pesa · ${formatKES(total)}`}
             </Button>
             <p className="text-xs text-center text-muted-foreground">
-              You'll be redirected to WhatsApp
+              You will receive an M-Pesa payment prompt on your phone.
             </p>
           </div>
         </aside>

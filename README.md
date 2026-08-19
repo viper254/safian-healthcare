@@ -33,7 +33,7 @@ npm run dev
 - **Charts**: Recharts
 
 ## 📱 Features
-- **WhatsApp-First Ordering**: Optimized checkout flow directly to WhatsApp
+- **M-Pesa Checkout**: Secure Daraja STK Push payments with asynchronous callback verification and manual WhatsApp fallback
 - **Real-time Analytics**: Track site traffic and sales in the admin dashboard
 - **Admin Dashboard**: Full control over products, categories, and orders
 - **Mobile Optimized**: Fast loading even on 3G connections
@@ -77,6 +77,16 @@ See `.env.example` for all required and optional variables.
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_SITE_URL` (use your custom domain, not Vercel URL)
+
+**Required for automated M-Pesa checkout:**
+- `SUPABASE_SERVICE_ROLE_KEY` (server-only)
+- `MPESA_CONSUMER_KEY` (server-only)
+- `MPESA_CONSUMER_SECRET` (server-only)
+- `MPESA_SHORTCODE` (server-only)
+- `MPESA_PASSKEY` (server-only)
+- `MPESA_ENVIRONMENT` (`sandbox` or `production`)
+- `MPESA_CALLBACK_URL` (public HTTPS callback URL; optional when derived from `NEXT_PUBLIC_SITE_URL`)
+- `MPESA_TRANSACTION_TYPE` (`CustomerPayBillOnline` or `CustomerBuyGoodsOnline`)
 
 **Optional (with defaults):**
 - `NEXT_PUBLIC_CONTACT_PHONE`
@@ -133,8 +143,13 @@ Consider adding:
 - LogRocket for session replay
 - PostHog for product analytics
 
+### Payment integration
+Automated M-Pesa checkout uses Safaricom Daraja STK Push. The browser calls the authenticated `/api/payments/mpesa/initiate` endpoint, the server creates the order and sends the prompt, Safaricom posts the result to `/api/payments/mpesa/callback`, and the order-success page polls `/api/payments/mpesa/status`. The callback verifies the stored checkout request, amount, phone number, and receipt before marking an order paid. Manual Paybill/WhatsApp ordering remains available as a fallback.
+
+Before enabling this in production, create and configure the `mpesa_transactions` table by running migration `015_mpesa_transactions.sql`, use a public HTTPS callback URL, and set all Daraja and Supabase service-role variables in the hosting provider’s server environment. Never expose these values as `NEXT_PUBLIC_*` variables.
+
 ### Future Enhancements
-- [ ] M-Pesa payment integration
+- [x] M-Pesa STK Push payment integration
 - [ ] Card payment gateway
 - [ ] Real-time order updates (Supabase Realtime)
 - [ ] PWA support

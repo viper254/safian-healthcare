@@ -74,7 +74,7 @@ export type OrderStatus =
 
 export type PaymentStatus = "unpaid" | "paid" | "refunded" | "failed";
 
-export type PaymentMethod = "mpesa" | "till" | "card" | "cash_on_delivery" | "bank_transfer";
+export type PaymentMethod = "mpesa" | "till" | "mpesa_till" | "card" | "cash_on_delivery" | "bank_transfer";
 
 export interface Order {
   id: string;

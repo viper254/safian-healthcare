@@ -12,6 +12,7 @@ import { formatKES } from "@/lib/utils";
 
 interface Product {
   id: string;
+  slug: string;
   name: string;
   original_price: number;
   stock_quantity: number;
@@ -20,6 +21,7 @@ interface Product {
 interface OrderLine {
   product_id: string;
   product_name: string;
+  product_slug: string;
   quantity: number;
   unit_price: number;
 }
@@ -39,7 +41,7 @@ export function ManualOrderForm() {
     shipping_address: "",
     shipping_city: "",
     shipping_notes: "",
-    payment_method: "mpesa_till" as const,
+    payment_method: "till" as const,
     payment_status: "unpaid" as const,
     status: "pending" as const,
     delivery_fee: "350",
@@ -51,7 +53,7 @@ export function ManualOrderForm() {
       const supabase = createSupabaseBrowserClient();
       const { data } = await supabase
         .from("products")
-        .select("id, name, original_price, stock_quantity")
+        .select("id, slug, name, original_price, stock_quantity")
         .eq("is_active", true)
         .order("name");
       
@@ -69,6 +71,7 @@ export function ManualOrderForm() {
     setLines(prev => [...prev, {
       product_id: "",
       product_name: "",
+      product_slug: "",
       quantity: 1,
       unit_price: 0,
     }]);
@@ -89,6 +92,7 @@ export function ManualOrderForm() {
             ...line,
             product_id: value,
             product_name: product.name,
+            product_slug: product.slug,
             unit_price: product.original_price,
           };
         }
@@ -147,8 +151,10 @@ export function ManualOrderForm() {
         order_id: order.id,
         product_id: line.product_id,
         product_name: line.product_name,
+        product_slug: line.product_slug,
         quantity: line.quantity,
         unit_price: line.unit_price,
+        line_total: line.unit_price * line.quantity,
       }));
 
       const { error: itemsError } = await supabase
@@ -404,7 +410,7 @@ export function ManualOrderForm() {
               onChange={handleChange}
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
-              <option value="whatsapp">WhatsApp</option>
+              <option value="till">Manual M-Pesa Till / WhatsApp</option>
               <option value="mpesa">M-Pesa</option>
               <option value="cash_on_delivery">Cash on Delivery</option>
               <option value="bank_transfer">Bank Transfer</option>

@@ -1,0 +1,6 @@
+{
+  "pwaUrl": "https://safian-healthcare.vercel.app",
+  "allowedHosts": ["safian-healthcare.vercel.app"],
+  "applicationName": "Safian Healthcare & Medical Supplies",
+  "applicationId": "com.safian.healthcare"
+}

@@ -1,0 +1,29 @@
+{
+  "name": "safian-pwa-desktop-shell",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Thin desktop container for the current Safian Healthcare PWA",
+  "homepage": "https://safian-healthcare.vercel.app",
+  "repository": "https://github.com/viper254/safian-healthcare",
+  "author": { "name": "Safian Healthcare", "email": "support@safianhealthcare.com" },
+  "main": "main.cjs",
+  "scripts": {
+    "prepare:release": "node prepare-release.cjs",
+    "verify": "node ../verify-shells.mjs",
+    "start": "npm run prepare:release && electron .",
+    "package:linux": "npm run prepare:release && electron-builder --linux deb --publish never",
+    "package:win": "npm run prepare:release && electron-builder --win nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "^38.2.2",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.safian.healthcare.desktop",
+    "productName": "Safian Healthcare",
+    "asar": true,
+    "files": ["main.cjs", "preload.cjs", "prepare-release.cjs", "pwa-release.json"],
+    "linux": { "target": ["deb"], "category": "Office", "maintainer": "Safian Healthcare <support@safianhealthcare.com>" },
+    "win": { "target": ["nsis"] }
+  }
+}

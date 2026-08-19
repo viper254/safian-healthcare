@@ -1,0 +1,15 @@
+name: SafianPWA
+options:
+  bundleIdPrefix: com.safian
+targets:
+  SafianPWA:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+    sources: [SafianPWA]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.safian.healthcare
+        PRODUCT_NAME: Safian Healthcare
+        SWIFT_VERSION: "5.0"
+        INFOPLIST_FILE: SafianPWA/Info.plist

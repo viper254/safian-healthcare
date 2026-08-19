@@ -1,0 +1,9 @@
+desktop/node_modules/
+desktop/release/
+desktop/dist/
+desktop/pwa-release.json
+android/.gradle/
+android/app/build/
+ios/build/
+ios/*.xcodeproj/
+ios/*.xcworkspace/

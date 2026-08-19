@@ -78,6 +78,12 @@ See `.env.example` for all required and optional variables.
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `NEXT_PUBLIC_SITE_URL` (use your custom domain, not Vercel URL)
 
+**Automated M-Pesa is disabled by default.** Keep both flags set to `false` until the merchant is ready:
+- `NEXT_PUBLIC_MPESA_STK_PUSH_ENABLED=false`
+- `MPESA_ENABLED=false` (server-only gate)
+
+To enable it later, set both flags to `true`, then configure the credentials below.
+
 **Required for automated M-Pesa checkout:**
 - `SUPABASE_SERVICE_ROLE_KEY` (server-only)
 - `MPESA_CONSUMER_KEY` (server-only)
@@ -144,7 +150,7 @@ Consider adding:
 - PostHog for product analytics
 
 ### Payment integration
-Automated M-Pesa checkout uses Safaricom Daraja STK Push. The browser calls the authenticated `/api/payments/mpesa/initiate` endpoint, the server creates the order and sends the prompt, Safaricom posts the result to `/api/payments/mpesa/callback`, and the order-success page polls `/api/payments/mpesa/status`. The callback verifies the stored checkout request, amount, phone number, and receipt before marking an order paid. Manual Paybill/WhatsApp ordering remains available as a fallback.
+The repository contains a Safaricom Daraja STK Push integration, but it is intentionally disabled by default. With both feature flags enabled, the browser calls the authenticated `/api/payments/mpesa/initiate` endpoint, the server creates the order and sends the prompt, Safaricom posts the result to `/api/payments/mpesa/callback`, and the order-success page polls `/api/payments/mpesa/status`. While disabled, checkout uses the manual WhatsApp/M-Pesa flow and the callback/status endpoints do not process payments. The callback verifies the stored checkout request, amount, phone number, and receipt before marking an order paid. Manual Paybill/WhatsApp ordering remains available as a fallback.
 
 Before enabling this in production, create and configure the `mpesa_transactions` table by running migration `015_mpesa_transactions.sql`, use a public HTTPS callback URL, and set all Daraja and Supabase service-role variables in the hosting provider’s server environment. Never expose these values as `NEXT_PUBLIC_*` variables.
 

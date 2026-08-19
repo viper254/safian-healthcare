@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { Plus, X } from "lucide-react";
 import { formatKES } from "@/lib/utils";
+import { siteConfig } from "@/lib/site-config";
 
 interface Product {
   id: string;
@@ -32,8 +33,6 @@ export function ManualOrderForm() {
   const [error, setError] = useState("");
   const [products, setProducts] = useState<Product[]>([]);
   const [lines, setLines] = useState<OrderLine[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-
   const [formData, setFormData] = useState({
     customer_name: "",
     customer_email: "",
@@ -81,24 +80,31 @@ export function ManualOrderForm() {
     setLines(prev => prev.filter((_, i) => i !== index));
   }
 
-  function updateLine(index: number, field: keyof OrderLine, value: any) {
-    setLines(prev => prev.map((line, i) => {
+  function updateLine(
+    index: number,
+    field: "product_id" | "quantity" | "unit_price",
+    value: string | number,
+  ) {
+    setLines((prev) => prev.map((line, i) => {
       if (i !== index) return line;
-      
+
       if (field === "product_id") {
-        const product = products.find(p => p.id === value);
+        const productId = String(value);
+        const product = products.find((p) => p.id === productId);
         if (product) {
           return {
             ...line,
-            product_id: value,
+            product_id: productId,
             product_name: product.name,
             product_slug: product.slug,
             unit_price: product.original_price,
           };
         }
+        return line;
       }
-      
-      return { ...line, [field]: value };
+
+      if (field === "quantity") return { ...line, quantity: Number(value) };
+      return { ...line, unit_price: Number(value) };
     }));
   }
 
@@ -165,17 +171,14 @@ export function ManualOrderForm() {
 
       router.push("/admin/orders");
       router.refresh();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error:", err);
-      setError(err?.message || "Failed to create order");
+      setError(err instanceof Error ? err.message : "Failed to create order");
     } finally {
       setLoading(false);
     }
   }
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -284,7 +287,7 @@ export function ManualOrderForm() {
 
         {lines.length === 0 ? (
           <p className="text-sm text-muted-foreground text-center py-8">
-            No items added. Click "Add Item" to start.
+            No items added. Click &quot;Add Item&quot; to start.
           </p>
         ) : (
           <div className="space-y-3">
@@ -411,7 +414,7 @@ export function ManualOrderForm() {
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="till">Manual M-Pesa Till / WhatsApp</option>
-              <option value="mpesa">M-Pesa</option>
+              {siteConfig.features.mpesaStkPush && <option value="mpesa">M-Pesa STK Push</option>}
               <option value="cash_on_delivery">Cash on Delivery</option>
               <option value="bank_transfer">Bank Transfer</option>
             </select>

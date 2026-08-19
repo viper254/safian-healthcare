@@ -75,9 +75,11 @@ This feature allows admins to permanently delete all orders and order-related an
 ## Key Features
 
 ### Payment System
-Automated checkout uses Safaricom Daraja STK Push. The customer submits an authenticated checkout, the server validates current product prices and stock, creates the order, and sends a payment prompt to the Kenyan phone number. Daraja calls `/api/payments/mpesa/callback` after the customer responds; the server verifies the stored CheckoutRequestID, amount, phone number, and receipt before setting `orders.payment_status` to `paid`. The order-success page polls `/api/payments/mpesa/status` for up to two minutes.
+The repository contains Safaricom Daraja STK Push support, but automated M-Pesa is intentionally **disabled by default**. While disabled, checkout remains on the manual M-Pesa/WhatsApp flow, the status endpoint refuses polling, and the callback is a no-op that does not modify orders.
 
-Add the following server-only values to `.env` or the hosting provider’s environment settings: `SUPABASE_SERVICE_ROLE_KEY`, `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY`, `MPESA_ENVIRONMENT=sandbox`, `MPESA_TRANSACTION_TYPE=CustomerPayBillOnline`, and a public HTTPS `MPESA_CALLBACK_URL`. In sandbox, create a Daraja app and use the credentials and test shortcode/passkey issued by the portal. In production, switch to `MPESA_ENVIRONMENT=production` and use the live credentials issued for the merchant’s shortcode. Never expose the consumer secret, passkey, or service-role key as `NEXT_PUBLIC_*` variables.
+To enable automated checkout later, set both flags to `true` in the deployment environment: `NEXT_PUBLIC_MPESA_STK_PUSH_ENABLED=true` and server-only `MPESA_ENABLED=true`. After both flags are enabled, the customer submits an authenticated checkout, the server validates current product prices and stock, creates the order, and sends a payment prompt to the Kenyan phone number. Daraja calls `/api/payments/mpesa/callback` after the customer responds; the server verifies the stored CheckoutRequestID, amount, phone number, and receipt before setting `orders.payment_status` to `paid`. The order-success page polls `/api/payments/mpesa/status` for up to two minutes.
+
+When you are ready to enable the feature, add the following server-only values to `.env` or the hosting provider’s environment settings: `SUPABASE_SERVICE_ROLE_KEY`, `MPESA_CONSUMER_KEY`, `MPESA_CONSUMER_SECRET`, `MPESA_SHORTCODE`, `MPESA_PASSKEY`, `MPESA_ENVIRONMENT=sandbox`, `MPESA_TRANSACTION_TYPE=CustomerPayBillOnline`, and a public HTTPS `MPESA_CALLBACK_URL`. Until then, leave both feature flags set to `false`. In sandbox, create a Daraja app and use the credentials and test shortcode/passkey issued by the portal. In production, switch to `MPESA_ENVIRONMENT=production` and use the live credentials issued for the merchant’s shortcode. Never expose the consumer secret, passkey, or service-role key as `NEXT_PUBLIC_*` variables.
 
 The existing manual Till/Paybill and WhatsApp path remains available from checkout as a fallback. Confirm the business’s actual Paybill/Till number before publishing manual-payment instructions, because the repository’s historical documentation contains conflicting legacy numbers.
 
@@ -124,6 +126,8 @@ NEXT_PUBLIC_SUPABASE_URL=your_production_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_production_key
 NEXT_PUBLIC_SITE_URL=https://yourdomain.com
 ADMIN_RESET_PASSWORD=YourSecurePassword123
+NEXT_PUBLIC_MPESA_STK_PUSH_ENABLED=false
+MPESA_ENABLED=false
 SUPABASE_SERVICE_ROLE_KEY=your_server_only_service_role_key
 MPESA_ENVIRONMENT=production
 MPESA_CONSUMER_KEY=your_live_consumer_key

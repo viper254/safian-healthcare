@@ -4,7 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 import { calculateDeliveryFee, normalizeKenyanPhone } from "@/lib/checkout";
 import { effectivePrice } from "@/lib/utils";
-import { initiateStkPush, MpesaError } from "@/lib/mpesa";
+import { initiateStkPush, isMpesaServerEnabled, MpesaError } from "@/lib/mpesa";
 import { checkRateLimit, getClientIdentifier, RATE_LIMITS } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
@@ -50,6 +50,13 @@ export async function POST(request: Request) {
     RATE_LIMITS.orders,
   );
   const headers = rateLimit.headers;
+
+  if (!isMpesaServerEnabled()) {
+    return NextResponse.json(
+      { error: "M-Pesa checkout is currently disabled. Please use the manual payment option." },
+      { status: 503, headers },
+    );
+  }
 
   if (!supabaseIsConfigured()) {
     return NextResponse.json(

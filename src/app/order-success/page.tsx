@@ -3,6 +3,7 @@ import { CheckCircle2, MessageCircle, Package, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { COMPANY_CONTACT } from "@/lib/constants";
 import { MpesaPaymentStatus } from "@/components/orders/mpesa-payment-status";
+import { siteConfig } from "@/lib/site-config";
 
 export default async function OrderSuccessPage({
   searchParams,
@@ -11,7 +12,7 @@ export default async function OrderSuccessPage({
   }) {
   const params = await searchParams;
   const reference = params.ref || "N/A";
-  const paymentMode = params.payment === "mpesa" ? "mpesa" : "manual";
+  const paymentMode = siteConfig.features.mpesaStkPush && params.payment === "mpesa" ? "mpesa" : "manual";
 
   return (
     <div className="container py-12 max-w-3xl">

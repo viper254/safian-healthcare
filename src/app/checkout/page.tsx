@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { formatKES } from "@/lib/utils";
 import { FREE_DELIVERY_OVER_KES, COMPANY_CONTACT } from "@/lib/constants";
 import { calculateDeliveryFee, normalizeKenyanPhone } from "@/lib/checkout";
+import { siteConfig } from "@/lib/site-config";
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -59,6 +60,7 @@ export default function CheckoutPage() {
   
   const delivery = calculateDeliveryFee(city, sub);
   const total = sub + delivery;
+  const mpesaEnabled = siteConfig.features.mpesaStkPush;
 
   if (lines.length === 0) {
     return (
@@ -317,7 +319,9 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
     <div className="container py-8 md:py-12">
       <h1 className="font-display font-bold text-3xl">Checkout</h1>
       <p className="text-sm text-muted-foreground mt-1">
-        Pay securely with M-Pesa STK Push. You will receive a payment prompt on your phone.
+        {mpesaEnabled
+          ? "Pay securely with M-Pesa STK Push. You will receive a payment prompt on your phone."
+          : "Complete your order through our manual M-Pesa and WhatsApp payment process."}
       </p>
       
       <div className="mt-8 grid gap-8 lg:grid-cols-[1fr_400px]">
@@ -343,12 +347,14 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
           <section className="rounded-2xl border-2 border-brand-green-500/30 bg-gradient-to-br from-brand-green-50 to-white dark:from-brand-green-950/20 dark:to-background p-6 shadow-sm">
             <div className="flex items-start gap-4">
               <div className="size-12 rounded-full bg-brand-green-500 flex items-center justify-center shrink-0">
-                <Smartphone className="size-6 text-white" />
+                {mpesaEnabled ? <Smartphone className="size-6 text-white" /> : <MessageCircle className="size-6 text-white" />}
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold text-lg">Pay with M-Pesa</h2>
+                <h2 className="font-semibold text-lg">{mpesaEnabled ? "Pay with M-Pesa" : "Manual M-Pesa payment"}</h2>
                 <p className="text-sm text-muted-foreground mt-1 mb-4">
-                  Enter your details below. We will send an STK Push prompt to your phone so you can complete payment securely with your M-Pesa PIN.
+                  {mpesaEnabled
+                    ? "Enter your details below. We will send an STK Push prompt to your phone so you can complete payment securely with your M-Pesa PIN."
+                    : "Enter your details below. We will create your order and open WhatsApp so you can confirm the manual M-Pesa payment."}
                 </p>
                 
                 <div className="space-y-3 mb-4">
@@ -388,7 +394,7 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                   </div>
                 </div>
                 
-                <Button
+                {mpesaEnabled && <Button
                   onClick={handleMpesaPayment}
                   variant="default"
                   size="lg"
@@ -397,20 +403,22 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                 >
                   <Smartphone className="size-5" />
                   {loading ? "Starting M-Pesa..." : "Pay with M-Pesa"}
-                </Button>
+                </Button>}
                 <Button
                   type="button"
                   onClick={handleWhatsAppOrder}
                   variant="outline"
                   size="lg"
-                  className="mt-3"
+                  className={mpesaEnabled ? "mt-3" : ""}
                   disabled={loading}
                 >
                   <MessageCircle className="size-5" />
-                  Use manual WhatsApp payment instead
+                  {mpesaEnabled ? "Use manual WhatsApp payment instead" : "Continue with manual payment via WhatsApp"}
                 </Button>
                 <p className="text-xs text-muted-foreground mt-2">
-                  A secure payment prompt will appear on the phone number above.
+                  {mpesaEnabled
+                    ? "A secure payment prompt will appear on the phone number above."
+                    : "Automated M-Pesa checkout is currently disabled; no STK Push will be sent."}
                 </p>
               </div>
             </div>
@@ -470,18 +478,33 @@ PLEASE CONFIRM AVAILABILITY AND DELIVERY`;
                 <dd className="font-bold">{formatKES(total)}</dd>
               </div>
             </dl>
-            <Button
-              onClick={handleMpesaPayment}
-              variant="gradient"
-              size="lg"
-              className="w-full"
-              disabled={loading}
-            >
-              <Smartphone className="size-5" />
-              {loading ? "Starting M-Pesa..." : `Pay with M-Pesa · ${formatKES(total)}`}
-            </Button>
+            {mpesaEnabled ? (
+              <Button
+                onClick={handleMpesaPayment}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
+                <Smartphone className="size-5" />
+                {loading ? "Starting M-Pesa..." : `Pay with M-Pesa · ${formatKES(total)}`}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleWhatsAppOrder}
+                variant="gradient"
+                size="lg"
+                className="w-full"
+                disabled={loading}
+              >
+                <MessageCircle className="size-5" />
+                {loading ? "Creating order..." : `Complete Order · ${formatKES(total)}`}
+              </Button>
+            )}
             <p className="text-xs text-center text-muted-foreground">
-              You will receive an M-Pesa payment prompt on your phone.
+              {mpesaEnabled
+                ? "You will receive an M-Pesa payment prompt on your phone."
+                : "You will be redirected to WhatsApp for manual payment confirmation."}
             </p>
           </div>
         </aside>

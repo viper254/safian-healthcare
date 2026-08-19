@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isMpesaServerEnabled } from "@/lib/mpesa";
 import { parseMpesaCallback } from "@/lib/mpesa";
 
 export const runtime = "nodejs";
@@ -23,6 +24,8 @@ async function findTransaction(checkoutRequestId: string) {
 }
 
 export async function POST(request: Request) {
+  if (!isMpesaServerEnabled()) return acceptedResponse();
+
   let payload: unknown;
   try {
     payload = await request.json();

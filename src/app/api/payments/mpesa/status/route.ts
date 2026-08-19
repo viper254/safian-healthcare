@@ -1,10 +1,18 @@
 import { NextResponse } from "next/server";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { isMpesaServerEnabled } from "@/lib/mpesa";
 import { createSupabaseServerClient, supabaseIsConfigured } from "@/lib/supabase/server";
 
 export const runtime = "nodejs";
 
 export async function GET(request: Request) {
+  if (!isMpesaServerEnabled()) {
+    return NextResponse.json(
+      { error: "M-Pesa checkout is currently disabled." },
+      { status: 503 },
+    );
+  }
+
   if (!supabaseIsConfigured()) {
     return NextResponse.json({ error: "Payments are not configured yet." }, { status: 503 });
   }

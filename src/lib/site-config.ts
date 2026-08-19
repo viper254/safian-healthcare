@@ -134,6 +134,8 @@ export const siteConfig = {
     productManagement: true,
     orderTracking: true,
     multiplePaymentMethods: true,
+    // Keep automated M-Pesa disabled until the merchant explicitly enables it.
+    mpesaStkPush: process.env.NEXT_PUBLIC_MPESA_STK_PUSH_ENABLED === "true",
     mobileFirst: true,
     seoOptimized: true,
   },

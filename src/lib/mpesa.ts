@@ -23,6 +23,10 @@ type TokenCache = {
 
 let tokenCache: TokenCache | null = null;
 
+export function isMpesaServerEnabled(): boolean {
+  return process.env.MPESA_ENABLED === "true";
+}
+
 export class MpesaError extends Error {
   constructor(
     message: string,
